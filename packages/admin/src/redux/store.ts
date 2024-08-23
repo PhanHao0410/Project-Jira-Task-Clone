@@ -12,15 +12,15 @@ const middleware = [
   routerMiddleware(history),
 ];
 
-const store = configureStore({
+const storeRedux = configureStore({
   middleware,
   reducer,
 });
 
 sagaMiddleware.run(saga);
 
-export type RootState = ReturnType<typeof store.getState>;
+export type RootState = ReturnType<typeof storeRedux.getState>;
 
-export type AppDispatch = typeof store.dispatch;
+export type AppDispatch = typeof storeRedux.dispatch;
 
-export default store;
+export default storeRedux;
