@@ -1,22 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { EditorState } from 'draft-js';
+import { Editor } from 'react-draft-wysiwyg';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SettingsIcon from '@mui/icons-material/Settings';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import Box from '@mui/material/Box';
-import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
 import CloseIcon from '@mui/icons-material/Close';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Slider from '@mui/material/Slider';
+import { Button } from '@mui/material';
+import { useMediaQuery } from '@material-ui/core';
+import history from '../../utils/history';
+import path from '../../constants/clientPath';
 
 import {
   AppBarContain,
@@ -28,16 +27,19 @@ import {
   FormCreateTaskContain,
 } from './styles';
 
-const AppBar = () => {
-  const [numberTag, setNumberTag] = useState('3');
-  const [openDrawer, setOpenDrawer] = React.useState(true);
+const AppBar = (props) => {
+  const [numberTag, setNumberTag] = useState('1');
+  const [openDrawer, setOpenDrawer] = React.useState(false);
   const [project, setProject] = React.useState('');
   const [status, setStatus] = React.useState('');
   const [priority, setPriority] = React.useState('');
   const [taskType, setTaskType] = React.useState('');
   const [estimateHour, setEstimateHour] = React.useState('0');
   const [spentHour, setSpentHour] = React.useState('0');
-
+  const [editorState, setEditorState] = useState(() =>
+    EditorState.createEmpty(),
+  );
+  const matches = useMediaQuery('(max-width: 960px)');
   const handleChangeProject = (event: SelectChangeEvent) => {
     setProject(event.target.value as string);
   };
@@ -77,6 +79,15 @@ const AppBar = () => {
     setOpenDrawer(true);
   };
 
+  const handleClickUsers = () => {
+    history.push(path.USERS);
+  };
+
+  const handleClickAccount = () => {
+    setAnchorElAccount(null);
+    history.push(path.ACCOUNTS);
+  };
+
   return (
     <AppBarContain>
       <AppBarRightContain>
@@ -99,16 +110,26 @@ const AppBar = () => {
               </span>
             </p>
             <ShowSelectProjectContain className="select-item-show">
-              <p>View all projects</p>
-              <p>Create projects</p>
+              <p
+                onClick={() => history.push(path.HOMEPROJECT)}
+                role="presentation"
+              >
+                View all projects
+              </p>
+              <p
+                onClick={() => history.replace(path.CREATEPROJECT)}
+                role="presentation"
+              >
+                Create projects
+              </p>
             </ShowSelectProjectContain>
           </div>
-          <div>
+          <div onClick={() => setNumberTag('2')} role="presentation">
             <p
               className={
                 numberTag === '2' ? 'select-item select-active' : 'select-item'
               }
-              onClick={() => setNumberTag('2')}
+              onClick={handleClickUsers}
               role="presentation"
             >
               Users
@@ -180,7 +201,7 @@ const AppBar = () => {
       >
         <div>
           <h3 style={{ textTransform: 'uppercase' }}>Haotech1</h3>
-          <MenuItem onClick={handleCloseAccount} className="menu-item">
+          <MenuItem onClick={handleClickAccount} className="menu-item">
             Profiles
           </MenuItem>
         </div>
@@ -196,16 +217,15 @@ const AppBar = () => {
       <DrawerCreateTaskContain
         anchor="right"
         open={openDrawer}
-        onClose={() => setOpenDrawer(true)}
+        onClose={() => setOpenDrawer(false)}
       >
         <Box
-          sx={{ width: '50vw' }}
+          sx={matches ? { width: '90vw' } : { width: '50vw' }}
           role="presentation"
-          onClick={() => setOpenDrawer(true)}
         >
           <div className="title-drawer">
             <h3>Create Task</h3>
-            <span>
+            <span onClick={() => setOpenDrawer(false)} role="presentation">
               <CloseIcon />
             </span>
           </div>
@@ -269,14 +289,7 @@ const AppBar = () => {
                   </FormControl>
                 </Box>
               </div>
-              <div
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '20px 0',
-                }}
-              >
+              <div className="field-number-contain">
                 <div className="field-item-contain field-item-45">
                   <p className="title-item">Priority</p>
                   <Box sx={{ minWidth: 120 }}>
@@ -334,14 +347,7 @@ const AppBar = () => {
               </div>
               <div style={{ paddingTop: '5px' }}>
                 <p className="title-item">Time Tracking</p>
-                <div
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: '20px 0 0px',
-                  }}
-                >
+                <div className="field-number-contain">
                   <div className="field-item-contain field-item-45">
                     <p className="title-item">Total Estimated Hours</p>
                     <input
@@ -387,10 +393,27 @@ const AppBar = () => {
                 style={{ paddingTop: '10px' }}
               >
                 <p className="title-item">Description</p>
-                <textarea />
+                <div>
+                  <Editor
+                    defaultEditorState={editorState}
+                    onEditorStateChange={setEditorState}
+                    wrapperClassName="wrapper-class"
+                    editorClassName="editor-class"
+                    toolbarClassName="toolbar-class"
+                  />
+                </div>
               </div>
             </form>
           </FormCreateTaskContain>
+          <div className="drawer-action-content">
+            <Button
+              className="btn btn-cancel"
+              onClick={() => setOpenDrawer(false)}
+            >
+              Cancel
+            </Button>
+            <Button className="btn btn-submit">Submit</Button>
+          </div>
         </Box>
       </DrawerCreateTaskContain>
     </AppBarContain>

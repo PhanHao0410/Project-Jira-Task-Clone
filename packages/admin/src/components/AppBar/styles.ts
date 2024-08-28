@@ -1,13 +1,14 @@
 import styled from 'styled-components';
 import Menu from '@mui/material/Menu';
 import Drawer from '@mui/material/Drawer';
+import Box from '@mui/material/Box';
 import { devices } from '../../JiraComponent/DeviceScreen';
 
 export const AppBarContain = styled.div`
   width: 100vw;
   height: 80px;
   border-bottom: 1px solid rgb(229 231 235);
-  position: fixed;
+  position: fixed !important;
   z-index: 999;
   box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -20,6 +21,7 @@ export const AppBarContain = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background-color: white;
 `;
 
 export const AppBarRightContain = styled.div`
@@ -159,6 +161,12 @@ export const DrawerCreateTaskContain = styled(Drawer)`
     align-items: center;
     height: 8vh;
     padding: 0px 30px;
+    span {
+      cursor: pointer;
+    }
+    @media ${devices.maxlg} {
+      padding: 0px 15px;
+    }
     h3 {
       font-size: 16px;
       line-height: 22px;
@@ -169,12 +177,44 @@ export const DrawerCreateTaskContain = styled(Drawer)`
       color: RGB(155 155 155);
     }
   }
+  .drawer-action-content {
+    border-top: 1px solid rgb(222, 222, 222);
+    height: 8vh;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+
+    .btn {
+      text-transform: none;
+      padding: 4px 12px;
+      border: 1px solid RGB(205 205 205);
+      margin-right: 10px;
+    }
+    .btn-cancel {
+      color: black;
+      &:hover {
+        color: RGB(82 152 219);
+        border: 1px solid RGB(82 152 219);
+      }
+    }
+    .btn-submit {
+      color: white;
+      background-color: RGB(82 152 219);
+      border: none;
+      &:hover {
+        background-color: RGB(96 142 189);
+      }
+    }
+  }
 `;
 
 export const FormCreateTaskContain = styled.div`
   padding: 30px 50px;
   overflow-y: scroll;
-  height: 82vh;
+  height: 84vh;
+  @media ${devices.maxlg} {
+    padding: 30px 15px;
+  }
   .field-item-contain {
     margin-bottom: 15px;
     .title-item {
@@ -229,5 +269,25 @@ export const FormCreateTaskContain = styled.div`
       width: 30px;
       height: 45px;
     }
+  }
+  .wrapper-class {
+    padding: 1rem;
+    border: 1px solid #ccc;
+  }
+  .editor-class {
+    background-color: lightgray;
+    padding: 1rem;
+    border: 1px solid #ccc;
+  }
+  .toolbar-class {
+    border: 1px solid #ccc;
+    display: flex;
+    width: 100%;
+  }
+  .field-number-contain {
+    padding: 20px 0 0px;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
   }
 `;
