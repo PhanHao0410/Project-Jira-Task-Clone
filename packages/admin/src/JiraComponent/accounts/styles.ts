@@ -74,7 +74,8 @@ export const FormInputAccountContain = styled.div`
     input {
       width: 100%;
       height: 35px;
-      padding: 0 10px;
+      padding-left: 15px;
+      padding-right: 70px;
       font-size: 16px;
       border-radius: 4px;
       border: 1px solid RGB(203 203 203);
@@ -84,6 +85,17 @@ export const FormInputAccountContain = styled.div`
       &:focus {
         outline: 1px solid #40a9ff;
         box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.2);
+        border: none;
+      }
+    }
+    .input-err {
+      border: 1px solid #ff4d4f;
+      &:hover {
+        border: 1px solid #ff4d4f;
+      }
+      &:focus {
+        outline: 1px solid #ff7875;
+        box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
         border: none;
       }
     }
@@ -104,6 +116,16 @@ export const FormInputAccountContain = styled.div`
       color: rgb(255, 80, 82);
       font-weight: 400;
       margin-left: 3px;
+    }
+  }
+  .password-contain {
+    position: relative;
+    .icon-password {
+      position: absolute;
+      color: rgb(117, 117, 117);
+      top: 5px;
+      right: 20px;
+      cursor: pointer;
     }
   }
   .account-action {

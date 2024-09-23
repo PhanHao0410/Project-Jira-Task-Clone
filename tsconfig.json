@@ -21,6 +21,7 @@
     "strictFunctionTypes": false,
     "strictBindCallApply": false,
     "strictPropertyInitialization": false,
+    "useDefineForClassFields": true,
     "noImplicitThis": false,
     "baseUrl": ".",
     "experimentalDecorators": true,
@@ -31,5 +32,6 @@
     }
   },
 
-  "include": ["src/**/*", "stories"]
+  // "include": ["src/**/*", "stories"]
+  "include": ["src/**/*"]
 }

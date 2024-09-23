@@ -1,13 +1,16 @@
 import React from 'react';
-import { Route, Switch, HashRouter } from 'react-router-dom';
+import { Route, HashRouter, Switch } from 'react-router-dom';
+
 import path from 'admin/src/constants/clientPath';
-import TestMobx from './JiraComponent/LogIn';
+import LogIn from './JiraComponent/LogIn';
 import SignUp from './JiraComponent/SignUp';
 import Users from './JiraComponent/users';
 import Accounts from './JiraComponent/accounts';
-import HomeProjects from './JiraComponent/home-project';
 import Projects from './JiraComponent/projects';
 import CreateProject from './JiraComponent/createProject';
+import DetailProject from './JiraComponent/detail-project';
+import EditProject from './JiraComponent/edit-project';
+import WordEmbed from './components/word-embed';
 import history from './utils/history';
 
 function App() {
@@ -21,9 +24,12 @@ function App() {
         {/**
          * PUBLIC PATHS
          *  */}
-        <Route exact path={path.ROOT} component={TestMobx} />
+        <Route exact path={path.ROOT} component={LogIn} />
+        <Route path={path.PROJECTS} component={Projects} />
+        <Route path={path.CREATEPROJECT} component={CreateProject} />
+        <Route path="/projec/:codeProject/board" component={DetailProject} />
+        <Route path="/pj/:codeProject/edit" component={EditProject} />
         <Route path={path.SIGNUP} component={SignUp} />
-        <Route path={path.HOMEPROJECT} component={HomeProjects} />
         <Route path={path.USERS} component={Users} />
         <Route path={path.ACCOUNTS} component={Accounts} />
 

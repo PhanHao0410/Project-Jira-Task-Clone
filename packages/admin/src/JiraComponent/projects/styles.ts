@@ -1,11 +1,13 @@
 import styled from 'styled-components';
+import Dialog from '@mui/material/Dialog';
+import { Menu } from '@mui/material';
 
 import { devices } from '../DeviceScreen';
 
 export const ProjectsContain = styled.div`
   padding-top: 100px;
   color: rgba(0, 0, 0, 0.85);
-  width: 100vw;
+  width: 100%;
   height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -125,8 +127,12 @@ export const TableContain = styled.table`
         z-index: 2;
         top: -5px;
       }
+      .icon-selected {
+        color: rgb(24, 144, 255);
+      }
     }
   }
+
   .css-34nofg-MuiTableRow-root {
     height: 100%;
     border-bottom: 1px solid rgb(225, 225, 225);
@@ -149,13 +155,14 @@ export const TableContain = styled.table`
       align-items: center;
       justify-content: center;
       position: relative;
+
       &:nth-child(2) {
         position: absolute;
         z-index: 2;
         top: 0;
         left: 25px;
       }
-      &:last-child {
+      &:nth-child(3) {
         position: absolute;
         z-index: 2;
         top: 0;
@@ -183,6 +190,7 @@ export const PaginationContain = styled.div`
   width: 100%;
   display: flex;
   justify-content: flex-end;
+  margin-bottom: 50px;
   .css-19xm0h7-MuiButtonBase-root-MuiPaginationItem-root.Mui-selected {
     border: 1px solid rgb(44, 153, 255);
     color: rgb(44, 153, 255);
@@ -245,7 +253,7 @@ export const ProjectContentItem = styled.ul`
         top: 0;
         left: 25px;
       }
-      &:last-child {
+      &:nth-child(3) {
         position: absolute;
         z-index: 2;
         top: 0;
@@ -254,5 +262,161 @@ export const ProjectContentItem = styled.ul`
         color: rgb(246, 108, 16);
       }
     }
+  }
+`;
+
+export const DialogContain = styled(Dialog)`
+  padding: 0px 20px;
+  #alert-dialog-title {
+    display: flex;
+    align-items: center;
+    span {
+      margin-right: 20px;
+      margin-top: 10px;
+      color: rgb(251, 192, 77);
+      transform: scale(1.3);
+    }
+    p {
+      font-size: 18px;
+    }
+  }
+  #alert-dialog-action {
+    margin-bottom: 10px;
+    .btn {
+      padding: 3px 12px;
+      text-transform: none;
+      color: white;
+    }
+    .btn-cancel {
+      background-color: rgb(29, 78, 216);
+      &:hover {
+        background-color: RGB(78 121 239);
+      }
+    }
+    .btn-delete {
+      background-color: rgb(220, 38, 38);
+      &:hover {
+        background-color: RGB(249 98 98);
+      }
+    }
+  }
+`;
+
+export const DialogSignInErrorContain = styled(Dialog)`
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  font-size: 1rem;
+  line-height: 1.2;
+  box-sizing: border-box;
+  #alert-dialog-title {
+    width: 100px;
+    height: 100px;
+    margin: 30px auto;
+    border: 5px solid #a5dc86;
+    border-radius: 50%;
+    animation: animationErrorIcon 0.5s;
+    .x-mark-contain {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: animateXMark 0.8s;
+      .x-mark-item {
+        height: 5px;
+        background-color: #a5dc86;
+        border-radius: 2px;
+        position: absolute;
+      }
+      .x-mark-left {
+        width: 47px;
+        left: 10px;
+        top: 28px;
+        transform: rotate(-45deg);
+      }
+      .x-mark-right {
+        width: 25px;
+        left: -4px;
+        top: 35px;
+        transform: rotate(45deg);
+      }
+    }
+  }
+  #dialog-content {
+    height: 100%;
+    text-align: center;
+    .image-error-contain {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      .image-error-item {
+        width: 100%;
+        height: 180px;
+        @media ${devices.maxpn} {
+          width: 100%;
+          height: 150px;
+        }
+      }
+    }
+    h3 {
+      font-size: 18px;
+      width: 100%;
+    }
+    p {
+      display: flex;
+      justify-content: center;
+      color: RGB(130 130 130);
+    }
+  }
+  .btn-dialog {
+    color: white;
+    padding: 10px 25px;
+    min-height: 0px;
+    min-width: 0px;
+    background-color: RGB(115 209 252);
+    margin-bottom: 15px;
+    margin-right: 15px;
+    &:hover {
+      background-color: RGB(77 192 246);
+    }
+  }
+  @keyframes animationErrorIcon {
+    0% {
+      transform: rotateX(100deg);
+      opacity: 0;
+    }
+    100% {
+      transform: rotateX(0deg);
+      opacity: 1;
+    }
+  }
+  @keyframes animateXMark {
+    0% {
+      transform: scale(0.4);
+      margin-top: 26px;
+      opacity: 0;
+    }
+    50% {
+      transform: scale(0.4);
+      margin-top: 26px;
+      opacity: 0;
+    }
+    80% {
+      transform: scale(1.15);
+      margin-top: -6px;
+    }
+    100% {
+      transform: scale(1);
+      margin-top: 0;
+      opacity: 1;
+    }
+  }
+`;
+
+export const MenuActionContain = styled(Menu)`
+  .css-3dzjca-MuiPaper-root-MuiPopover-paper-MuiMenu-paper {
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
   }
 `;

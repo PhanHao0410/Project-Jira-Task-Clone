@@ -10,6 +10,9 @@ const mainRequestConfig = {
   baseURL: API_HOST.BASE_URL,
 };
 
+const tokenExtra =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5Mb3AiOiJCb290Y2FtcCAwMSIsIkhldEhhblN0cmluZyI6IjMwLzA5LzIwMzEiLCJIZXRIYW5UaW1lIjoiMTk0ODQ5MjgwMDAwMCIsIm5iZiI6MTYwMTIyNjAwMCwiZXhwIjoxOTQ4NjQwNDAwfQ.4l-eTzlgVnFczfvc2Or7BNPOcaesY3Kwc8RoNm-o-6M';
+
 const baseService = axios.create(mainRequestConfig);
 
 baseService.interceptors.request.use(
@@ -18,6 +21,7 @@ baseService.interceptors.request.use(
       ...config,
       headers: {
         Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+        Tokencybersoft: tokenExtra,
       },
     };
   },

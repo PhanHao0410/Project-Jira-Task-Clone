@@ -133,6 +133,9 @@ export const AppBarActionContain = styled.div`
     font-size: 14px;
     margin: 0 10px;
     cursor: pointer;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
   }
 `;
 

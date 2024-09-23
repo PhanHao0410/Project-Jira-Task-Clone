@@ -4,7 +4,7 @@ import Menu from '@mui/material/Menu';
 import { devices } from '../DeviceScreen';
 
 export const UserContain = styled.div`
-  width: 100vw;
+  width: 100%;
   height: 100%;
   padding-top: 80px;
   font-size: 1rem;
@@ -20,22 +20,76 @@ export const UserContain = styled.div`
   }
 `;
 
-export const ClearUserContain = styled.div`
-  display: inline-block;
-  margin: 30px 0;
-  border: 1px solid RGB(209 213 219);
-  padding: 4px 12px;
-  cursor: pointer;
-  border-radius: 4px;
-  &:hover {
-    color: rgb(42, 153, 255);
-    border: 1px solid rgb(42, 153, 255);
+export const ActionUserContain = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 30px 10px;
+  .clear-filter-contain {
+    display: inline-block;
+    border: 1px solid RGB(209 213 219);
+    padding: 4px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    &:hover {
+      color: rgb(42, 153, 255);
+      border: 1px solid rgb(42, 153, 255);
+    }
+    &:active {
+      box-shadow: RGB(208 232 255) 0px 1px 2px, RGB(208 232 255) 0px 2px 4px,
+        RGB(208 232 255) 0px 4px 8px, RGB(208 232 255) 0px 8px 16px,
+        RGB(208 232 255) 0px 16px 32px, RGB(208 232 255) 0px 32px 64px;
+      transition: all 0.3s;
+    }
+    @media ${devices.maxmd} {
+      display: none;
+    }
   }
-  &:active {
-    box-shadow: RGB(208 232 255) 0px 1px 2px, RGB(208 232 255) 0px 2px 4px,
-      RGB(208 232 255) 0px 4px 8px, RGB(208 232 255) 0px 8px 16px,
-      RGB(208 232 255) 0px 16px 32px, RGB(208 232 255) 0px 32px 64px;
+`;
+export const SearchProjectContain = styled.div`
+  position: relative;
+  width: 250px;
+  input {
+    position: relative;
+    height: 35px;
+    border: 1px solid RGB(222 222 222);
+    border-radius: 4px;
+    font-size: 16px;
+    width: 100%;
+    padding-left: 15px;
+    padding-right: 60px;
     transition: all 0.3s;
+    &:hover {
+      border: 1px solid #40a9ff;
+      transition: all 0.3s;
+    }
+    &:focus {
+      outline: 1px solid #40a9ff;
+      border: none;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+      transition: all 0.3s;
+    }
+  }
+  .icon-find {
+    position: absolute;
+    z-index: 2;
+    top: 6px;
+    right: 8px;
+    transform: scale(0.8);
+  }
+  .icon-cancel {
+    transform: scale(0.6);
+  }
+  span {
+    position: absolute;
+    z-index: 2;
+    top: 6px;
+    right: 30px;
+    color: RGB(193 193 193);
+    cursor: pointer;
+    &:hover {
+      color: RGB(161 162 163);
+    }
   }
 `;
 
@@ -75,6 +129,17 @@ export const TableContain = styled.table`
         z-index: 2;
         top: -5px;
       }
+      .icon-selected {
+        color: RGB(24 144 255);
+      }
+    }
+    .table-head-arrange {
+      cursor: pointer;
+      transition: all 0.3s;
+      &:hover {
+        background-color: RGB(240 240 240);
+        transition: all 0.3s;
+      }
     }
   }
   .css-34nofg-MuiTableRow-root {
@@ -83,6 +148,10 @@ export const TableContain = styled.table`
 
     &:hover {
       background-color: rgb(250, 250, 250);
+    }
+    .test-phone {
+      overflow-wrap: break-word;
+      max-width: 15vw;
     }
 
     .edit-icon {
@@ -166,6 +235,8 @@ export const ProjectContentItem = styled.ul`
     }
     p {
       font-size: 14px;
+      max-width: 40vw;
+      overflow-wrap: break-word;
     }
     .edit-icon {
       color: rgb(37, 84, 217);

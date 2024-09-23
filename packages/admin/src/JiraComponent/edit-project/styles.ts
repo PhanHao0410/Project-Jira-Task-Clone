@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const CreateProjectContain = styled.div`
+export const EditProjectContain = styled.div`
   height: 100%;
   width: 100%;
   padding-top: 80px;
@@ -13,7 +13,7 @@ export const CreateProjectContain = styled.div`
   position: relative;
 `;
 
-export const CreateProjectContent = styled.div`
+export const EditProjectContent = styled.div`
   position: relative;
   margin: 30px auto;
   width: 60%;
@@ -37,6 +37,16 @@ export const CreateProjectContent = styled.div`
   .title-main {
     font-size: 24px;
     font-weight: 500;
+  }
+  .input-disable-contain {
+    input {
+      cursor: not-allowed;
+      background-color: RGB(235 235 235);
+      color: RGB(152 152 152);
+      &:hover {
+        border: 1px solid rgb(226, 226, 226);
+      }
+    }
   }
 `;
 
@@ -66,18 +76,6 @@ export const FormInputContain = styled.div`
       box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
     }
   }
-  .input-error {
-    border: 1px solid #ff4d4f;
-    &:hover {
-      border: 1px solid #ff4d4f;
-    }
-    &:focus {
-      border: none;
-      outline: 1px solid #ff4d4f;
-      box-shadow: 0 0 0 2px RGB(255 199 199);
-    }
-  }
-
   .css-1yk1gt9-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root:hover
     .MuiOutlinedInput-notchedOutline {
     border: 1px solid #40a9ff;
@@ -94,12 +92,6 @@ export const FormInputContain = styled.div`
   }
   .css-kk1bwy-MuiButtonBase-root-MuiMenuItem-root.Mui-selected {
     font-weight: 600 !important;
-  }
-  .show-error {
-    color: #ff4d4f;
-    margin-left: 5px;
-    font-size: 14px;
-    padding-top: 3px;
   }
 `;
 
@@ -118,12 +110,15 @@ export const DescriptionContain = styled.div`
       border: 1px solid #ccc;
     }
     .editor-class {
-      background-color: lightgray;
+      background-color: RGB(242 242 242);
       padding: 1rem;
       border: 1px solid #ccc;
     }
     .toolbar-class {
       border: 1px solid #ccc;
+      display: flex;
+      width: 100%;
+      color: rgb(126, 126, 126);
     }
   }
   .rdw-inline-wrapper {

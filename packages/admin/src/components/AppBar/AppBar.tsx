@@ -16,6 +16,11 @@ import { Button } from '@mui/material';
 import { useMediaQuery } from '@material-ui/core';
 import history from '../../utils/history';
 import path from '../../constants/clientPath';
+import {
+  removeToken,
+  removeLoginInfo,
+  getLoginInfo,
+} from '../../utils/localStorage';
 
 import {
   AppBarContain,
@@ -40,6 +45,7 @@ const AppBar = (props) => {
     EditorState.createEmpty(),
   );
   const matches = useMediaQuery('(max-width: 960px)');
+  const userSignIn = JSON.parse(getLoginInfo());
   const handleChangeProject = (event: SelectChangeEvent) => {
     setProject(event.target.value as string);
   };
@@ -70,9 +76,6 @@ const AppBar = (props) => {
   const handleOpenAccount = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorElAccount(event.currentTarget);
   };
-  const handleCloseAccount = () => {
-    setAnchorElAccount(null);
-  };
 
   const handleClickCreatTask = () => {
     setNumberTag('3');
@@ -86,6 +89,13 @@ const AppBar = (props) => {
   const handleClickAccount = () => {
     setAnchorElAccount(null);
     history.push(path.ACCOUNTS);
+  };
+
+  const handleLogOutAccount = () => {
+    setAnchorElAccount(null);
+    removeToken();
+    removeLoginInfo();
+    history.push(path.ROOT);
   };
 
   return (
@@ -111,7 +121,7 @@ const AppBar = (props) => {
             </p>
             <ShowSelectProjectContain className="select-item-show">
               <p
-                onClick={() => history.push(path.HOMEPROJECT)}
+                onClick={() => history.push(path.PROJECTS)}
                 role="presentation"
               >
                 View all projects
@@ -161,11 +171,10 @@ const AppBar = (props) => {
         <Tooltip title="Your profile and settings">
           <div
             className="avatar-account"
-            onClick={handleOpenAccount}
             role="presentation"
-          >
-            HA
-          </div>
+            onClick={handleOpenAccount}
+            style={{ backgroundImage: `url(${userSignIn?.avatar})` }}
+          />
         </Tooltip>
       </AppBarActionContain>
       <MenuShowContain
@@ -179,13 +188,25 @@ const AppBar = (props) => {
       >
         <div>
           <h3>Atlassian Admin</h3>
-          <MenuItem onClick={handleCloseSetting} className="menu-item">
+          <MenuItem
+            onClick={() => {
+              setAnchorElSetting(null);
+              history.push(path.USERS);
+            }}
+            className="menu-item"
+          >
             User management
           </MenuItem>
         </div>
         <div>
           <h3>Jira Settings</h3>
-          <MenuItem onClick={handleCloseSetting} className="menu-item">
+          <MenuItem
+            onClick={() => {
+              setAnchorElSetting(null);
+              history.push(path.PROJECTS);
+            }}
+            className="menu-item"
+          >
             Projects
           </MenuItem>
         </div>
@@ -194,7 +215,7 @@ const AppBar = (props) => {
         id="basic-menu"
         anchorEl={anchorElAccount}
         open={openAccount}
-        onClose={handleCloseAccount}
+        onClose={() => setAnchorElAccount(null)}
         MenuListProps={{
           'aria-labelledby': 'basic-button',
         }}
@@ -207,7 +228,7 @@ const AppBar = (props) => {
         </div>
 
         <MenuItem
-          onClick={handleCloseAccount}
+          onClick={handleLogOutAccount}
           className="menu-item"
           style={{ borderTop: '1px solid RGB(220 220 220)' }}
         >

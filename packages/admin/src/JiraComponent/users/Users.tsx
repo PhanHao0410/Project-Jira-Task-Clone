@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { observer } from 'mobx-react-lite';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -14,34 +15,129 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Button from '@mui/material/Button';
-import { styled } from '@mui/material/styles';
-import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
 import ErrorIcon from '@mui/icons-material/Error';
+import SearchIcon from '@mui/icons-material/Search';
+import CancelIcon from '@mui/icons-material/Cancel';
+import { useMediaQuery } from '@mui/material';
 import AppBar from '../../components/AppBar';
+import { useStoreMobx } from '../../mobx/hook';
 import {
   UserContain,
-  ClearUserContain,
   TableContain,
   PaginationContain,
   ProjectsContentContain,
   ProjectContentItem,
   BootstrapDialog,
   MenuContain,
+  SearchProjectContain,
+  ActionUserContain,
 } from './styles';
 
 const Users = () => {
+  const {
+    rootStore: { userStore },
+  } = useStoreMobx();
+
+  const matches = useMediaQuery('(max-width: 768px)');
   const [page, setPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [open, setOpen] = React.useState(false);
+  const [dataPagination, setDataPagination] = useState([]);
+  const [valueSearch, setValueSearch] = useState('');
+  const [arrangeName, setArrangeName] = useState(0);
+  const [arrangeUserId, setArrangeUserId] = useState(0);
+  const [numberPagination, setNumberPagination] = useState(0);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const openCancel = Boolean(anchorEl);
+  const DataUsers = userStore.getDataUsers;
+
+  useEffect(() => {
+    userStore.fetchAllUsers();
+  }, []);
+
+  useEffect(() => {
+    const rowPrevious: number = page * rowsPerPage - rowsPerPage;
+    const rowNext: number = page * rowsPerPage;
+    const DataUserCopy = [...DataUsers];
+    setNumberPagination(DataUsers.length);
+    if (arrangeName === 1) {
+      setDataPagination(
+        DataUserCopy.sort((a, b) => a.name.localeCompare(b.name)).slice(
+          rowPrevious,
+          rowNext,
+        ),
+      );
+    } else if (arrangeName === 2) {
+      setDataPagination(
+        DataUserCopy.sort((a, b) => b.name.localeCompare(a.name)).slice(
+          rowPrevious,
+          rowNext,
+        ),
+      );
+    } else if (arrangeUserId === 1) {
+      setDataPagination(
+        DataUserCopy.sort((a, b) => a.userId - b.userId).slice(
+          rowPrevious,
+          rowNext,
+        ),
+      );
+    } else if (arrangeUserId === 2) {
+      setDataPagination(
+        DataUserCopy.sort((a, b) => b.userId - a.userId).slice(
+          rowPrevious,
+          rowNext,
+        ),
+      );
+    } else {
+      setDataPagination(DataUsers?.slice(rowPrevious, rowNext));
+    }
+
+    if (valueSearch) {
+      setNumberPagination(
+        DataUserCopy.filter((item) =>
+          item.name.toLowerCase().includes(valueSearch.toLowerCase()),
+        ).length,
+      );
+      setDataPagination(
+        DataUserCopy.filter((item) =>
+          item.name.toLowerCase().includes(valueSearch.toLowerCase()),
+        ).slice(rowPrevious, rowNext),
+      );
+    }
+    if (matches) {
+      setArrangeName(0);
+      setArrangeUserId(0);
+      if (valueSearch) {
+        setNumberPagination(
+          DataUserCopy.filter((item) =>
+            item.name.toLowerCase().includes(valueSearch.toLowerCase()),
+          ).length,
+        );
+        setDataPagination(
+          DataUserCopy.filter((item) =>
+            item.name.toLowerCase().includes(valueSearch.toLowerCase()),
+          ).slice(rowPrevious, rowNext),
+        );
+      } else {
+        setDataPagination(DataUsers?.slice(rowPrevious, rowNext));
+      }
+    }
+  }, [
+    rowsPerPage,
+    DataUsers,
+    page,
+    arrangeName,
+    arrangeUserId,
+    valueSearch,
+    matches,
+  ]);
+
   const handleClickMenuCancel = (
     event: React.MouseEvent<HTMLButtonElement>,
   ) => {
@@ -70,11 +166,60 @@ const Users = () => {
     setPage(newPage);
   };
 
+  const handleArrangeName = () => {
+    setArrangeUserId(0);
+    if (arrangeName === 0) {
+      setArrangeName(1);
+    } else if (arrangeName === 1) {
+      setArrangeName(2);
+    } else {
+      setArrangeName(0);
+    }
+  };
+
+  const handleArrangeUserId = () => {
+    setArrangeName(0);
+    if (arrangeUserId === 0) {
+      setArrangeUserId(1);
+    } else if (arrangeUserId === 1) {
+      setArrangeUserId(2);
+    } else {
+      setArrangeUserId(0);
+    }
+  };
+
+  const handleClearFilterUser = () => {
+    setArrangeName(0);
+    setArrangeUserId(0);
+    setValueSearch('');
+  };
+
   return (
     <>
       <AppBar />
       <UserContain>
-        <ClearUserContain>Clear filters and sorters</ClearUserContain>
+        <ActionUserContain>
+          <SearchProjectContain className="search-contain">
+            <input
+              value={valueSearch}
+              onChange={(e) => setValueSearch(e.target.value)}
+              placeholder="Search name"
+            />
+            <SearchIcon className="icon-find" />
+            {valueSearch && (
+              <span onClick={() => setValueSearch('')} role="presentation">
+                <CancelIcon className="icon-cancel" />
+              </span>
+            )}
+          </SearchProjectContain>
+          <div
+            className="clear-filter-contain"
+            onClick={handleClearFilterUser}
+            role="presentation"
+          >
+            Clear filters and sorters
+          </div>
+        </ActionUserContain>
         <TableContain>
           <Table aria-label="simple table">
             <TableHead>
@@ -84,21 +229,45 @@ const Users = () => {
                     <h3>No</h3>
                   </div>
                 </TableCell>
-                <TableCell align="left">
+                <TableCell
+                  align="left"
+                  className="table-head-arrange"
+                  onClick={handleArrangeName}
+                >
                   <div className="title-table-contain">
                     <h3>Name</h3>
                     <div className="icon-contain">
-                      <ArrowDropUpSharpIcon className="icon-up" />
-                      <ArrowDropDownSharpIcon className="icon-down" />
+                      <ArrowDropUpSharpIcon
+                        className={`icon-up ${
+                          arrangeName === 1 ? 'icon-selected' : ''
+                        }`}
+                      />
+                      <ArrowDropDownSharpIcon
+                        className={`icon-down ${
+                          arrangeName === 2 ? 'icon-selected' : ''
+                        }`}
+                      />
                     </div>
                   </div>
                 </TableCell>
-                <TableCell align="left">
+                <TableCell
+                  align="left"
+                  className="table-head-arrange"
+                  onClick={handleArrangeUserId}
+                >
                   <div className="title-table-contain">
                     <h3>User ID</h3>
                     <div className="icon-contain">
-                      <ArrowDropUpSharpIcon className="icon-up" />
-                      <ArrowDropDownSharpIcon className="icon-down" />
+                      <ArrowDropUpSharpIcon
+                        className={`icon-up ${
+                          arrangeUserId === 1 ? 'icon-selected' : ''
+                        }`}
+                      />
+                      <ArrowDropDownSharpIcon
+                        className={`icon-down ${
+                          arrangeUserId === 2 ? 'icon-selected' : ''
+                        }`}
+                      />
                     </div>
                   </div>
                 </TableCell>
@@ -112,66 +281,95 @@ const Users = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              <TableRow
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell align="left">1</TableCell>
-                <TableCell align="left">huuu</TableCell>
-                <TableCell align="left">2417</TableCell>
-                <TableCell align="left">phanhao@gmail.com</TableCell>
-                <TableCell align="left">113</TableCell>
-                <TableCell align="left">
-                  <div>
-                    <span onClick={handleClickOpen} role="presentation">
-                      <DriveFileRenameOutlineIcon className="edit-icon" />
-                    </span>
-                    <span onClick={handleClickMenuCancel} role="presentation">
-                      <DeleteForeverIcon className="cancel-icon" />
-                    </span>
-                  </div>
-                </TableCell>
-              </TableRow>
+              {dataPagination &&
+                dataPagination.length > 0 &&
+                dataPagination?.map((item, ind) => {
+                  return (
+                    <TableRow
+                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                      key={item.userId}
+                      className="test-phone"
+                    >
+                      <TableCell align="left">
+                        {ind + (page - 1) * rowsPerPage + 1}
+                      </TableCell>
+                      <TableCell align="left" className="test-phone">
+                        {item.name}
+                      </TableCell>
+                      <TableCell align="left" className="test-phone">
+                        {item.userId}
+                      </TableCell>
+                      <TableCell align="left" className="test-phone">
+                        {item.email}
+                      </TableCell>
+                      <TableCell align="left" className="test-phone">
+                        {item.phoneNumber}
+                      </TableCell>
+                      <TableCell align="left" className="test-phone">
+                        <div>
+                          <span onClick={handleClickOpen} role="presentation">
+                            <DriveFileRenameOutlineIcon className="edit-icon" />
+                          </span>
+                          <span
+                            onClick={handleClickMenuCancel}
+                            role="presentation"
+                          >
+                            <DeleteForeverIcon className="cancel-icon" />
+                          </span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
             </TableBody>
           </Table>
         </TableContain>
         <ProjectsContentContain>
-          <ProjectContentItem>
-            <li>
-              <h5>No</h5>
-              <p style={{ color: 'rgb(29 78 216)' }}>1</p>
-            </li>
-            <li>
-              <h5>Name</h5>
-              <p>huhuh</p>
-            </li>
-            <li>
-              <h5>User ID</h5>
-              <p>2417</p>
-            </li>
-            <li>
-              <h5>Email</h5>
-              <p>phanhao@gmail.com</p>
-            </li>
-            <li>
-              <h5>Phone Number</h5>
-              <p>113</p>
-            </li>
-            <li>
-              <h5>Action</h5>
-              <div>
-                <span>
-                  <DriveFileRenameOutlineIcon className="edit-icon" />
-                </span>
-                <span>
-                  <DeleteForeverIcon className="cancel-icon" />
-                </span>
-              </div>
-            </li>
-          </ProjectContentItem>
+          {dataPagination &&
+            dataPagination.length > 0 &&
+            dataPagination.map((item, ind) => {
+              return (
+                <ProjectContentItem key={item.userId}>
+                  <li>
+                    <h5>No</h5>
+                    <p style={{ color: 'rgb(29 78 216)' }}>
+                      {ind + (page - 1) * rowsPerPage + 1}
+                    </p>
+                  </li>
+                  <li>
+                    <h5>Name</h5>
+                    <p>{item.name}</p>
+                  </li>
+                  <li>
+                    <h5>User ID</h5>
+                    <p>{item.userId}</p>
+                  </li>
+                  <li>
+                    <h5>Email</h5>
+                    <p>{item.email}</p>
+                  </li>
+                  <li>
+                    <h5>Phone Number</h5>
+                    <p className="value-item">{item.phoneNumber}</p>
+                  </li>
+                  <li>
+                    <h5>Action</h5>
+                    <div>
+                      <span onClick={handleClickOpen} role="presentation">
+                        <DriveFileRenameOutlineIcon className="edit-icon" />
+                      </span>
+                      <span onClick={handleClickMenuCancel} role="presentation">
+                        <DeleteForeverIcon className="cancel-icon" />
+                      </span>
+                    </div>
+                  </li>
+                </ProjectContentItem>
+              );
+            })}
         </ProjectsContentContain>
         <PaginationContain>
           <Pagination
-            count={700 / rowsPerPage}
+            count={Math.ceil(numberPagination / rowsPerPage)}
             page={page}
             onChange={handleChangePage}
             variant="outlined"
@@ -303,4 +501,4 @@ const Users = () => {
   );
 };
 
-export default Users;
+export default observer(Users);

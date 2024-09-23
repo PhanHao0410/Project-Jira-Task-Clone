@@ -8,8 +8,10 @@ import GlobalStyles from './themes/GlobalStyles';
 import history from './utils/history';
 import GlobalContainer from './containers/Global';
 import App from './App';
-import TaskStore from './JiraComponent/LogIn/taskStore';
+import { rooStoreContext } from './mobx/index';
 import 'react-toastify/dist/ReactToastify.css';
+import { RootStore } from './mobx/rootStore';
+import { CountStore } from './JiraComponent/LogIn/CountStore';
 
 const loading = () => (
   <div className="animated fadeIn pt-3 text-center">Loading...</div>
@@ -19,7 +21,7 @@ const root = ReactDOM.createRoot(document.getElementById('root-admin'));
 const StoreContext = React.createContext(null);
 root.render(
   <React.Suspense fallback={loading()}>
-    <Provider {...TaskStore}>
+    <Provider {...RootStore}>
       <Theme>
         <GlobalStyles />
         <App />
@@ -44,7 +46,7 @@ if (module.hot) {
     const AppContainer = require('./App').default;
     root.render(
       <React.Suspense fallback={loading()}>
-        <StoreContext.Provider value={TaskStore}>
+        <StoreContext.Provider value={RootStore}>
           <Theme>
             <GlobalStyles />
             <AppContainer />

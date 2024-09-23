@@ -2,9 +2,8 @@ const clientPath = {
   LOGIN: '/login',
   ROOT: '/',
   SIGNUP: '/register',
-  HOMEPROJECT: '/projects',
-  PROJECTS: '/',
-  CREATEPROJECT: '/new',
+  PROJECTS: '/projects',
+  CREATEPROJECT: '/project/new',
   USERS: '/users',
   ACCOUNTS: '/my-profile',
 };
