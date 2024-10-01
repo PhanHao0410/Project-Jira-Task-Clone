@@ -73,6 +73,7 @@ const CardItem = ({ data, handleDragging }: Props) => {
   const [anchorElPriority, setAnchorElPriority] =
     React.useState<null | HTMLElement>(null);
   const [openTimeTracking, setOpenTimeTracking] = React.useState(false);
+  // console.log('check item: ', data);
 
   const handleClickOpenTimeTracking = () => {
     setOpenTimeTracking(true);
@@ -112,7 +113,7 @@ const CardItem = ({ data, handleDragging }: Props) => {
     setOpen(false);
   };
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    e.dataTransfer.setData('text', `${data.id}`);
+    e.dataTransfer.setData('text', `${data.taskId}`);
     handleDragging(true);
   };
   const handleDragEnd = () => handleDragging(false);
@@ -129,11 +130,11 @@ const CardItem = ({ data, handleDragging }: Props) => {
         style={{ cursor: 'pointer' }}
         onClick={handleClickOpen}
       >
-        <h3>{data.content}</h3>
+        <h3>{data.taskName}</h3>
         <div className="inform-contain">
           <div className="priority-contain">
             <CheckBoxIcon className="icon-priority" />
-            <p>{data.priority}</p>
+            <p>{data.priorityTask.priority}</p>
           </div>
           <AccountCircleIcon className="icon-avatar" />
         </div>

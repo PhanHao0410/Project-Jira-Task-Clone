@@ -5,9 +5,15 @@ import AuthenticationService from '../../services/AuthenticationService';
 export class UserStore {
   userData: any = [];
 
+  deleteUserData: any = {};
+
+  editUserData: any = {};
+
   isLoading: boolean;
 
   errordata: string = '';
+
+  errorDeleteUser: string = '';
 
   rootStore: IRootStore;
 
@@ -16,11 +22,21 @@ export class UserStore {
       userData: observable,
       isLoading: observable,
       errordata: observable,
+      deleteUserData: observable,
+      errorDeleteUser: observable,
+      editUserData: observable,
       fetchAllUsers: action,
+      fetchDeleteUser: action,
+      fetchEditUser: action,
       getDataUsers: computed,
       getIsLoading: computed,
       getErrorData: computed,
+      getDataDeleteUser: computed,
+      getErrorDeleteUser: computed,
+      getDataEditUser: computed,
       setResetState: action,
+      ResetStateEditUser: action,
+      setResetStateDeleteUser: action,
     });
     this.rootStore = rootStore;
   }
@@ -41,10 +57,54 @@ export class UserStore {
     }
   };
 
+  fetchDeleteUser = async (userId) => {
+    try {
+      this.isLoading = true;
+      this.deleteUserData = {};
+      this.errorDeleteUser = '';
+      const response = await AuthenticationService.deleteUser(userId);
+      if (response.status === 200) {
+        this.isLoading = false;
+        this.deleteUserData = toJS(response.data);
+      }
+    } catch (e) {
+      this.isLoading = false;
+      this.deleteUserData = {};
+      this.errorDeleteUser = e.response.data.content;
+    }
+  };
+
+  fetchEditUser = async (action) => {
+    try {
+      this.isLoading = true;
+      this.editUserData = {};
+      const response = await AuthenticationService.editUser(action);
+      if (response.status === 200) {
+        this.isLoading = false;
+        this.editUserData = toJS(response.data);
+      }
+    } catch (e) {
+      this.isLoading = false;
+      this.editUserData = {};
+      console.log('check err edit: ', e.response);
+    }
+  };
+
   setResetState() {
     this.isLoading = false;
     this.userData = [];
     this.errordata = '';
+  }
+
+  ResetStateEditUser() {
+    this.isLoading = false;
+    this.editUserData = {};
+  }
+
+  setResetStateDeleteUser() {
+    this.isLoading = false;
+    this.errorDeleteUser = '';
+    this.deleteUserData = {};
   }
 
   get getDataUsers() {
@@ -57,5 +117,17 @@ export class UserStore {
 
   get getErrorData() {
     return this.errordata;
+  }
+
+  get getDataDeleteUser() {
+    return this.deleteUserData;
+  }
+
+  get getDataEditUser() {
+    return toJS(this.editUserData);
+  }
+
+  get getErrorDeleteUser() {
+    return this.errorDeleteUser;
   }
 }

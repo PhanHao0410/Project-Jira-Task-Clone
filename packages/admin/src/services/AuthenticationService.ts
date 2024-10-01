@@ -5,6 +5,7 @@ import {
   SignUpForm,
   ProjectIdForm,
   CreateProjectForm,
+  AssignUserForm,
 } from '../types/Requests';
 import { UserResponse } from '../types/Responses';
 
@@ -32,16 +33,48 @@ const getAllUsers = (): Promise<AxiosResponse> => {
   return BaseService.get(`${BASE_URL}/Users/getUser`);
 };
 
-// const createProject = (dataCreatProject,
-// ): Promise<AxiosResponse<UserResponse>> => {
-//   return BaseService.post(
-//     `${BASE_URL}/Project/createProjectAuthorize`,
-//     dataCreatProject,
-//   );
-// };
-
 const createProject = (data: CreateProjectForm): Promise<AxiosResponse> => {
   return BaseService.post(`${BASE_URL}/Project/createProjectAuthorize`, data);
+};
+
+const assignUserProjects = (data: AssignUserForm): Promise<AxiosResponse> => {
+  return BaseService.post(`${BASE_URL}/Project/assignUserProject`, data);
+};
+
+const getUserByProjectId = (projectId): Promise<AxiosResponse> => {
+  return BaseService.get(
+    `${BASE_URL}/Users/getUserByProjectId?idProject=${projectId}`,
+  );
+};
+
+const removeUserFromProject = (
+  data: AssignUserForm,
+): Promise<AxiosResponse> => {
+  return BaseService.post(`${BASE_URL}/Project/removeUserFromProject`, data);
+};
+
+const deleteUser = (data): Promise<AxiosResponse> => {
+  return BaseService.delete(`${BASE_URL}/Users/deleteUser?id=${data}`);
+};
+
+const editUser = (data): Promise<AxiosResponse> => {
+  return BaseService.put(`${BASE_URL}/Users/editUser`, data);
+};
+
+const getAllStatus = (): Promise<AxiosResponse> => {
+  return BaseService.get(`${BASE_URL}/Status/getAll`);
+};
+
+const getAllTaskType = (): Promise<AxiosResponse> => {
+  return BaseService.get(`${BASE_URL}/TaskType/getAll`);
+};
+
+const getAllPriority = (): Promise<AxiosResponse> => {
+  return BaseService.get(`${BASE_URL}/Priority/getAll`);
+};
+
+const ProjectDetail = (data): Promise<AxiosResponse> => {
+  return BaseService.get(`${BASE_URL}/Project/getProjectDetail?id=${data}`);
 };
 
 export default {
@@ -51,4 +84,13 @@ export default {
   getAllUsers,
   deleteProjects,
   createProject,
+  assignUserProjects,
+  getUserByProjectId,
+  removeUserFromProject,
+  deleteUser,
+  editUser,
+  getAllStatus,
+  getAllTaskType,
+  getAllPriority,
+  ProjectDetail,
 };

@@ -76,6 +76,7 @@ const Projects = () => {
   const open = Boolean(anchorEl);
   const dataLogIn = logInStore.getLoginData;
   const Datas = projectsStore.getDataProjects;
+  const dataDeleteProject = projectsStore.getDeleteProjectData;
   const DeleteError = projectsStore.getDeleteErrorData;
   useEffect(() => {
     if (dataLogIn && dataLogIn.content) {
@@ -88,7 +89,7 @@ const Projects = () => {
 
   useEffect(() => {
     projectsStore.fetchAllProjects(keyUrlSearch);
-  }, [keyUrlSearch]);
+  }, [keyUrlSearch, dataDeleteProject]);
 
   useEffect(() => {
     const rowPrevious: number = rowPerPage * 10 - 10;
@@ -252,6 +253,7 @@ const Projects = () => {
   const handleCloseErrorDelete = () => {
     setOpenErrorDelete(false);
     setSelectAction('');
+    projectsStore.setResetDeleteProjectState();
   };
 
   return (
@@ -384,7 +386,7 @@ const Projects = () => {
                       <TableCell
                         align="left"
                         className="body-project-name"
-                        onClick={() => history.push(`/projec/${1546}/board`)}
+                        onClick={() => history.push(`/projec/${item.id}/board`)}
                       >
                         {item.projectName}
                       </TableCell>

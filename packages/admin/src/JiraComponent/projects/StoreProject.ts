@@ -11,7 +11,7 @@ export class ProjectStore {
 
   errordata: string = '';
 
-  deleteProjectData: any = {};
+  deleteProjectData: any = [];
 
   deleteError: string = '';
 
@@ -77,7 +77,7 @@ export class ProjectStore {
 
   setResetDeleteProjectState() {
     this.isLoading = false;
-    this.deleteProjectData = {};
+    this.deleteProjectData = [];
     this.deleteError = '';
   }
 

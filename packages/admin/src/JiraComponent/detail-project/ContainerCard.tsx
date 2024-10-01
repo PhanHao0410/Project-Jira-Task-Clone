@@ -5,7 +5,7 @@ import { Data, Status } from '../../types/Requests';
 import { CardContain } from './styles';
 
 interface Props {
-  items: Data[];
+  items;
   status: Status;
   isDragging: boolean;
   handleUpdateList: (id: number, status: Status) => void;
@@ -25,33 +25,35 @@ export const ContainerCards = ({
     handleDragging(false);
   };
 
+  // console.log('check daata: ', items);
+  // console.log('check status: ', status);
+
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) =>
     e.preventDefault();
 
   return (
     <CardContain onDrop={handleDrop} onDragOver={handleDragOver}>
-      {(status === 'backlog' && (
+      {(status === '1' && (
         <p className="title-task title-backlog">backlog</p>
       )) ||
-        (status === 'selected' && (
+        (status === '2' && (
           <p className="title-task title-selected">selected for development</p>
         )) ||
-        (status === 'progress' && (
+        (status === '3' && (
           <p className="title-task title-progress">in progress</p>
         )) ||
-        (status === 'done' && <p className="title-task title-done">done</p>)}
-      {items.map(
-        (item) =>
-          status === item.status && (
-            <CardItem
-              data={item}
-              key={item.id}
-              handleDragging={handleDragging}
-              isDragging={isDragging}
-            />
-          ),
-      )}
-      {status === 'backlog' && (
+        (status === '4' && <p className="title-task title-done">done</p>)}
+      {items.map((item) => (
+        <>
+          <CardItem
+            data={item}
+            key={item.taskId}
+            handleDragging={handleDragging}
+            isDragging={isDragging}
+          />
+        </>
+      ))}
+      {status === '1' && (
         <div className="add-task">
           <AddIcon />
           <p>Create</p>

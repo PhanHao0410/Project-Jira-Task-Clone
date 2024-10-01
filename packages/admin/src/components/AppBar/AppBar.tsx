@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { observer } from 'mobx-react-lite';
 import { EditorState } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -16,6 +19,7 @@ import { Button } from '@mui/material';
 import { useMediaQuery } from '@material-ui/core';
 import history from '../../utils/history';
 import path from '../../constants/clientPath';
+import { useStoreMobx } from '../../mobx/hook';
 import {
   removeToken,
   removeLoginInfo,
@@ -32,20 +36,77 @@ import {
   FormCreateTaskContain,
 } from './styles';
 
+interface ICreateTaskForm {
+  project: string;
+  taskName: string;
+  description: string;
+  statusId: string;
+  priorityId: number;
+  taskTypeId: number;
+  assignerId: number;
+}
+
 const AppBar = (props) => {
-  const [numberTag, setNumberTag] = useState('1');
+  const {
+    rootStore: { projectsStore, appbarStore, createProjectStore },
+  } = useStoreMobx();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<ICreateTaskForm>();
+
+  const navigate = useLocation();
+
+  const matches = useMediaQuery('(max-width: 960px)');
+  const userSignIn = JSON.parse(getLoginInfo());
+  const dataAllProject = projectsStore.getDataProjects;
+  const dataStatus = appbarStore.getDataStatus;
+  const dataPriority = appbarStore.getDataPriority;
+  const dataTaskType = appbarStore.getDataTaskType;
+  const dataUserProject = createProjectStore.getDataUserByProjectId;
+  const ProjectName = watch('project');
+  const [valueProject, setValueProject] = useState<number>();
   const [openDrawer, setOpenDrawer] = React.useState(false);
   const [project, setProject] = React.useState('');
-  const [status, setStatus] = React.useState('');
+  const [status, setStatus] = React.useState(1);
   const [priority, setPriority] = React.useState('');
   const [taskType, setTaskType] = React.useState('');
   const [estimateHour, setEstimateHour] = React.useState('0');
   const [spentHour, setSpentHour] = React.useState('0');
+  const [anchorElSetting, setAnchorElSetting] =
+    React.useState<null | HTMLElement>(null);
+  const openSetting = Boolean(anchorElSetting);
+
+  const [anchorElAccount, setAnchorElAccount] =
+    React.useState<null | HTMLElement>(null);
+  const openAccount = Boolean(anchorElAccount);
   const [editorState, setEditorState] = useState(() =>
     EditorState.createEmpty(),
   );
-  const matches = useMediaQuery('(max-width: 960px)');
-  const userSignIn = JSON.parse(getLoginInfo());
+
+  useEffect(() => {
+    if (openDrawer) {
+      projectsStore.fetchAllProjects('');
+      appbarStore.fetchDataStatus();
+      appbarStore.fetchDataPriority();
+      appbarStore.fetchDataTaskType();
+      if (valueProject) {
+        createProjectStore.fetchUserByProjectId(valueProject);
+      }
+    }
+  }, [openDrawer, valueProject]);
+
+  useEffect(() => {
+    if (ProjectName) {
+      setValueProject(Number(ProjectName));
+    } else {
+      setValueProject(dataAllProject[0]?.id);
+    }
+  }, [ProjectName, dataAllProject]);
+
   const handleChangeProject = (event: SelectChangeEvent) => {
     setProject(event.target.value as string);
   };
@@ -59,14 +120,6 @@ const AppBar = (props) => {
     setTaskType(event.target.value as string);
   };
 
-  const [anchorElSetting, setAnchorElSetting] =
-    React.useState<null | HTMLElement>(null);
-  const openSetting = Boolean(anchorElSetting);
-
-  const [anchorElAccount, setAnchorElAccount] =
-    React.useState<null | HTMLElement>(null);
-  const openAccount = Boolean(anchorElAccount);
-
   const handleOpenSetting = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorElSetting(event.currentTarget);
   };
@@ -75,15 +128,6 @@ const AppBar = (props) => {
   };
   const handleOpenAccount = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorElAccount(event.currentTarget);
-  };
-
-  const handleClickCreatTask = () => {
-    setNumberTag('3');
-    setOpenDrawer(true);
-  };
-
-  const handleClickUsers = () => {
-    history.push(path.USERS);
   };
 
   const handleClickAccount = () => {
@@ -98,6 +142,10 @@ const AppBar = (props) => {
     history.push(path.ROOT);
   };
 
+  const handleSubmitCreateTask = (data) => {
+    console.log('check data submit: ', data);
+  };
+
   return (
     <AppBarContain>
       <AppBarRightContain>
@@ -109,10 +157,10 @@ const AppBar = (props) => {
           <div className=" select-project">
             <p
               className={
-                numberTag === '1' ? 'select-item select-active' : 'select-item'
+                navigate.pathname.slice(0, 7) === '/projec'
+                  ? 'select-item select-active'
+                  : 'select-item'
               }
-              onClick={() => setNumberTag('1')}
-              role="presentation"
             >
               Projects
               <span>
@@ -134,12 +182,14 @@ const AppBar = (props) => {
               </p>
             </ShowSelectProjectContain>
           </div>
-          <div onClick={() => setNumberTag('2')} role="presentation">
+          <div>
             <p
               className={
-                numberTag === '2' ? 'select-item select-active' : 'select-item'
+                navigate.pathname.slice(0, 7) === '/users'
+                  ? 'select-item select-active'
+                  : 'select-item'
               }
-              onClick={handleClickUsers}
+              onClick={() => history.push(path.USERS)}
               role="presentation"
             >
               Users
@@ -147,10 +197,8 @@ const AppBar = (props) => {
           </div>
           <div>
             <p
-              className={
-                numberTag === '3' ? 'select-item select-active' : 'select-item'
-              }
-              onClick={handleClickCreatTask}
+              className="select-item "
+              onClick={() => setOpenDrawer(true)}
               role="presentation"
             >
               Create Task
@@ -244,127 +292,178 @@ const AppBar = (props) => {
           sx={matches ? { width: '90vw' } : { width: '50vw' }}
           role="presentation"
         >
-          <div className="title-drawer">
-            <h3>Create Task</h3>
-            <span onClick={() => setOpenDrawer(false)} role="presentation">
-              <CloseIcon />
-            </span>
-          </div>
-          <Divider />
-          <FormCreateTaskContain>
-            <form>
+          <form onSubmit={handleSubmit(handleSubmitCreateTask)}>
+            <div className="title-drawer">
+              <h3>Create Task</h3>
+              <span onClick={() => setOpenDrawer(false)} role="presentation">
+                <CloseIcon />
+              </span>
+            </div>
+            <Divider />
+            <FormCreateTaskContain>
               <div className="field-item-contain">
                 <p className="title-item">Project</p>
-                <Box sx={{ minWidth: 120 }}>
-                  <FormControl fullWidth className="input-field-item">
-                    <InputLabel id="demo-simple-select-label">
-                      Projects
-                    </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      value={project}
-                      label="Projects"
-                      onChange={handleChangeProject}
-                      className="select-mui"
-                    >
-                      <MenuItem value={10}>Ten</MenuItem>
-                      <MenuItem value={20}>Twenty</MenuItem>
-                      <MenuItem value={30}>Thirty</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
+                {dataAllProject && dataAllProject.length > 0 && (
+                  <Box sx={{ minWidth: 120 }}>
+                    <FormControl sx={{ minWidth: 120, width: '100%' }}>
+                      <Select
+                        // displayEmpty
+                        inputProps={{ 'aria-label': 'Without label' }}
+                        {...register('project', {
+                          required: 'Project is required',
+                        })}
+                        defaultValue={dataAllProject[0].id}
+                      >
+                        {dataAllProject &&
+                          dataAllProject.length > 0 &&
+                          dataAllProject.map((item, ind) => {
+                            return (
+                              <MenuItem
+                                value={item.id}
+                                key={`${item.id}${ind}`}
+                              >
+                                {item.projectName}
+                              </MenuItem>
+                            );
+                          })}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                )}
                 <div className="show-error">
                   * You can only create tasks of your own projects!
+                </div>
+                <div
+                  className="show-error"
+                  style={{
+                    color: 'red',
+                    fontWeight: '400',
+                    marginTop: '3px',
+                    marginLeft: '5px',
+                  }}
+                >
+                  {errors.project?.message}
                 </div>
               </div>
               <div className="field-item-contain">
                 <p className="title-item">Task name</p>
-                <input placeholder="Task name" />
-                <div
-                  className="show-error"
-                  style={{ marginTop: '1px', color: 'red' }}
-                >
-                  Task name is requied!
+                <input
+                  placeholder="Create task"
+                  {...register('taskName', {
+                    required: ' Task name is required',
+                  })}
+                />
+                {errors.taskName?.message && (
+                  <div
+                    className="show-error"
+                    style={{ marginTop: '1px', color: 'red' }}
+                  >
+                    {errors.taskName?.message}
+                  </div>
+                )}
+              </div>
+              {dataStatus && dataStatus.length > 0 && (
+                <div className="field-item-contain">
+                  <p className="title-item">Status</p>
+                  <Box sx={{ minWidth: 120 }}>
+                    <FormControl sx={{ minWidth: 120, width: '100%' }}>
+                      <Select
+                        displayEmpty
+                        inputProps={{ 'aria-label': 'Without label' }}
+                        defaultValue={dataStatus[0].statusId}
+                        {...register('statusId')}
+                      >
+                        {dataStatus.map((item) => {
+                          return (
+                            <MenuItem value={item.statusId} key={item.statusId}>
+                              {item.statusName}
+                            </MenuItem>
+                          );
+                        })}
+                      </Select>
+                    </FormControl>
+                  </Box>
                 </div>
-              </div>
-              <div className="field-item-contain">
-                <p className="title-item">Status</p>
-                <Box sx={{ minWidth: 120 }}>
-                  <FormControl fullWidth className="input-field-item">
-                    <InputLabel id="demo-simple-select-label">
-                      Status
-                    </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      value={status}
-                      label="Status"
-                      onChange={handleChangeStatus}
-                      className="select-mui"
-                    >
-                      <MenuItem value={10}>Ten</MenuItem>
-                      <MenuItem value={20}>Twenty</MenuItem>
-                      <MenuItem value={30}>Thirty</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-              </div>
+              )}
               <div className="field-number-contain">
-                <div className="field-item-contain field-item-45">
-                  <p className="title-item">Priority</p>
-                  <Box sx={{ minWidth: 120 }}>
-                    <FormControl fullWidth className="input-field-item">
-                      <InputLabel id="demo-simple-select-label">
-                        Priority
-                      </InputLabel>
-                      <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        value={priority}
-                        label="Priority"
-                        onChange={handleChangePriority}
-                        className="select-mui"
+                {dataPriority && dataPriority.length > 0 && (
+                  <div className="field-item-contain field-item-45">
+                    <p className="title-item">Priority</p>
+                    <Box sx={{ minWidth: 120 }}>
+                      <FormControl sx={{ minWidth: 120, width: '100%' }}>
+                        <Select
+                          displayEmpty
+                          inputProps={{ 'aria-label': 'Without label' }}
+                          defaultValue={dataPriority[0].priorityId}
+                          {...register('priorityId')}
+                        >
+                          {dataPriority.map((item) => {
+                            return (
+                              <MenuItem
+                                value={item.priorityId}
+                                key={item.priorityId}
+                              >
+                                {item.priority}
+                              </MenuItem>
+                            );
+                          })}
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  </div>
+                )}
+                {dataTaskType && dataTaskType.length > 0 && (
+                  <div className="field-item-contain field-item-45">
+                    <p className="title-item">Task Type</p>
+                    <Box sx={{ minWidth: 120 }}>
+                      <FormControl
+                        sx={{
+                          minWidth: 120,
+                          width: '100%',
+                          textTransform: 'uppercase',
+                        }}
                       >
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-                </div>
-                <div className="field-item-contain field-item-45">
-                  <p className="title-item">Task Type</p>
-                  <Box sx={{ minWidth: 120 }}>
-                    <FormControl fullWidth className="input-field-item">
-                      <InputLabel id="demo-simple-select-label">
-                        TaskType
-                      </InputLabel>
-                      <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        value={taskType}
-                        label="TaskType"
-                        onChange={handleChangeTaskType}
-                        className="select-mui"
-                      >
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-                </div>
+                        <Select
+                          displayEmpty
+                          inputProps={{ 'aria-label': 'Without label' }}
+                          defaultValue={dataTaskType[0].id}
+                        >
+                          {dataTaskType.map((item) => {
+                            return (
+                              <MenuItem
+                                value={item.id}
+                                key={item.id}
+                                sx={{ textTransform: 'uppercase' }}
+                              >
+                                {item.taskType}
+                              </MenuItem>
+                            );
+                          })}
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  </div>
+                )}
               </div>
               <div className="field-item-contain">
                 <p className="title-item">Assigners</p>
-                <input placeholder="Assigners" />
-                <div
-                  className="show-error"
-                  style={{ marginTop: '1px', color: 'red' }}
-                >
-                  Assigners is requied!
-                </div>
+                <FormControl sx={{ minWidth: 120, width: '100%' }}>
+                  <Select
+                    displayEmpty
+                    inputProps={{ 'aria-label': 'Without label' }}
+                    {...register('assignerId')}
+                  >
+                    {dataUserProject &&
+                      dataUserProject.length > 0 &&
+                      dataUserProject.map((item) => {
+                        return (
+                          <MenuItem value={item.userId} key={item.userId}>
+                            {item.name}
+                          </MenuItem>
+                        );
+                      })}
+                  </Select>
+                </FormControl>
               </div>
               <div style={{ paddingTop: '5px' }}>
                 <p className="title-item">Time Tracking</p>
@@ -421,24 +520,32 @@ const AppBar = (props) => {
                     wrapperClassName="wrapper-class"
                     editorClassName="editor-class"
                     toolbarClassName="toolbar-class"
+                    {...register('description', {
+                      required: 'Description is required',
+                    })}
                   />
+                  {errors.description?.message && (
+                    <p>{errors.description?.message}</p>
+                  )}
                 </div>
               </div>
-            </form>
-          </FormCreateTaskContain>
-          <div className="drawer-action-content">
-            <Button
-              className="btn btn-cancel"
-              onClick={() => setOpenDrawer(false)}
-            >
-              Cancel
-            </Button>
-            <Button className="btn btn-submit">Submit</Button>
-          </div>
+            </FormCreateTaskContain>
+            <div className="drawer-action-content">
+              <Button
+                className="btn btn-cancel"
+                onClick={() => setOpenDrawer(false)}
+              >
+                Cancel
+              </Button>
+              <Button className="btn btn-submit" type="submit">
+                Submit
+              </Button>
+            </div>
+          </form>
         </Box>
       </DrawerCreateTaskContain>
     </AppBarContain>
   );
 };
 
-export default AppBar;
+export default observer(AppBar);

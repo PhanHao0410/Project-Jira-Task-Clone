@@ -6,4 +6,5 @@ export type {
   SignUpForm,
   ProjectIdForm,
   CreateProjectForm,
+  AssignUserForm,
 } from './LoginForm';

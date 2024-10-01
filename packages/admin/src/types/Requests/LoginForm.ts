@@ -20,11 +20,21 @@ export interface CreateProjectForm {
   projectName: string;
 }
 
-export type Status = 'backlog' | 'selected' | 'progress' | 'done';
-export type Priority = 'high' | 'medium' | 'low' | 'lowest';
-export interface Data {
-  id: number;
-  content: string;
-  status: Status;
+export interface AssignUserForm {
+  projectId: number;
+  userId: number;
+}
+
+export type Status = '1' | '2' | '3' | '4';
+export type Priority = 'High' | 'Medium' | 'Low' | 'Lowest';
+
+export interface PriorityType {
   priority: Priority;
+  priorityId: number;
+}
+export interface Data {
+  taskId: number;
+  taskName: string;
+  status: Status;
+  priorityTask: PriorityType;
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
+import { useForm } from 'react-hook-form';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -24,6 +25,8 @@ import Typography from '@mui/material/Typography';
 import ErrorIcon from '@mui/icons-material/Error';
 import SearchIcon from '@mui/icons-material/Search';
 import CancelIcon from '@mui/icons-material/Cancel';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useMediaQuery } from '@mui/material';
 import AppBar from '../../components/AppBar';
 import { useStoreMobx } from '../../mobx/hook';
@@ -37,12 +40,32 @@ import {
   MenuContain,
   SearchProjectContain,
   ActionUserContain,
+  DialogSignInSuccessContain,
+  DialogSignInErrorContain,
 } from './styles';
+
+interface UpdateAccountForm {
+  avatar: string;
+  email: string;
+  name: string;
+  phoneNumber: string;
+  id: number;
+  password: string;
+  passwordConfirmation: string;
+}
 
 const Users = () => {
   const {
     rootStore: { userStore },
   } = useStoreMobx();
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<UpdateAccountForm>();
 
   const matches = useMediaQuery('(max-width: 768px)');
   const [page, setPage] = React.useState(1);
@@ -53,13 +76,26 @@ const Users = () => {
   const [arrangeName, setArrangeName] = useState(0);
   const [arrangeUserId, setArrangeUserId] = useState(0);
   const [numberPagination, setNumberPagination] = useState(0);
+  const [userIdCurrent, setUserIdCurrent] = useState<number>(null);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [userEdit, setUserEdit] = useState({});
+  const [emailEdit, setEmailEdit] = useState('');
+  const [nameEdit, setNameEdit] = useState('');
+  const [phoneEdit, setPhoneEdit] = useState('');
+  const [showPassword, setShowPassword] = useState(true);
+  const [openProcessUpdate, setOpenProcessUpdate] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(true);
+  const [openDeleteError, setOpenDeleteError] = useState(false);
+  const [openDeleteSuccess, setOpenDeleteSuccess] = useState(false);
   const openCancel = Boolean(anchorEl);
   const DataUsers = userStore.getDataUsers;
+  const DataDeleteUser = userStore.getDataDeleteUser;
+  const errorDeleteUser = userStore.getErrorDeleteUser;
+  const dataEditUser = userStore.getDataEditUser;
 
   useEffect(() => {
     userStore.fetchAllUsers();
-  }, []);
+  }, [DataDeleteUser]);
 
   useEffect(() => {
     const rowPrevious: number = page * rowsPerPage - rowsPerPage;
@@ -138,17 +174,39 @@ const Users = () => {
     matches,
   ]);
 
+  useEffect(() => {
+    if (DataDeleteUser && DataDeleteUser.content) {
+      setOpenDeleteSuccess(true);
+    }
+    if (errorDeleteUser) {
+      setOpenDeleteError(true);
+    }
+  }, [DataDeleteUser, errorDeleteUser]);
+
+  useEffect(() => {
+    if (dataEditUser && dataEditUser.content) {
+      setOpenProcessUpdate(true);
+    }
+  }, [dataEditUser]);
+
   const handleClickMenuCancel = (
     event: React.MouseEvent<HTMLButtonElement>,
+    id,
   ) => {
     setAnchorEl(event.currentTarget);
+    setUserIdCurrent(id);
   };
   const handleCloseMenuCancel = () => {
     setAnchorEl(null);
+    setUserIdCurrent();
   };
 
-  const handleClickOpen = () => {
+  const handleClickOpenEdit = (user) => {
     setOpen(true);
+    setUserEdit(user);
+    setEmailEdit(user.email);
+    setNameEdit(user.name);
+    setPhoneEdit(user.phoneNumber);
   };
   const handleClose = () => {
     setOpen(false);
@@ -164,6 +222,11 @@ const Users = () => {
     newPage: number,
   ) => {
     setPage(newPage);
+  };
+
+  const handleCloseOpenProcessUpdate = () => {
+    setOpenProcessUpdate(false);
+    userStore.ResetStateEditUser();
   };
 
   const handleArrangeName = () => {
@@ -192,6 +255,31 @@ const Users = () => {
     setArrangeName(0);
     setArrangeUserId(0);
     setValueSearch('');
+  };
+
+  const handleDeleteUser = () => {
+    setAnchorEl(null);
+    const id = userIdCurrent;
+    userStore.fetchDeleteUser(id);
+    setUserIdCurrent(null);
+  };
+
+  const handleDialogDeleteError = () => {
+    setOpenDeleteError(false);
+    userStore.setResetStateDeleteUser();
+  };
+
+  const handleDialogDeleteSuccess = () => {
+    setOpenDeleteSuccess(false);
+    userStore.setResetStateDeleteUser();
+  };
+
+  const updateInformAccountUser = (data) => {
+    userStore.fetchEditUser(data);
+    setOpen(false);
+    setUserEdit({});
+    setValue('password', '');
+    setValue('passwordConfirmation', '');
   };
 
   return (
@@ -307,11 +395,16 @@ const Users = () => {
                       </TableCell>
                       <TableCell align="left" className="test-phone">
                         <div>
-                          <span onClick={handleClickOpen} role="presentation">
+                          <span
+                            onClick={() => handleClickOpenEdit(item)}
+                            role="presentation"
+                          >
                             <DriveFileRenameOutlineIcon className="edit-icon" />
                           </span>
                           <span
-                            onClick={handleClickMenuCancel}
+                            onClick={(e) =>
+                              handleClickMenuCancel(e, item.userId)
+                            }
                             role="presentation"
                           >
                             <DeleteForeverIcon className="cancel-icon" />
@@ -355,10 +448,16 @@ const Users = () => {
                   <li>
                     <h5>Action</h5>
                     <div>
-                      <span onClick={handleClickOpen} role="presentation">
+                      <span
+                        onClick={() => handleClickOpenEdit(item)}
+                        role="presentation"
+                      >
                         <DriveFileRenameOutlineIcon className="edit-icon" />
                       </span>
-                      <span onClick={handleClickMenuCancel} role="presentation">
+                      <span
+                        onClick={(e) => handleClickMenuCancel(e, item.userId)}
+                        role="presentation"
+                      >
                         <DeleteForeverIcon className="cancel-icon" />
                       </span>
                     </div>
@@ -413,64 +512,165 @@ const Users = () => {
           >
             <CloseIcon />
           </IconButton>
-          <DialogContent dividers className="dialog-content">
-            <Typography gutterBottom>
-              <div className="input-item-contain">
-                <p>
-                  Id<span>*</span>
-                </p>
-                <input value="12345" className="input-value-default" disabled />
-              </div>
-            </Typography>
-            <Typography gutterBottom>
-              <div className="input-item-contain">
-                <p>
-                  Email<span>*</span>
-                </p>
-                <input />
-              </div>
-            </Typography>
-            <Typography gutterBottom>
-              <div className="input-item-contain">
-                <p>
-                  Name<span>*</span>
-                </p>
-                <input />
-              </div>
-            </Typography>
-            <Typography gutterBottom>
-              <div className="input-item-contain">
-                <p>Phone number</p>
-                <input />
-              </div>
-            </Typography>
-            <Typography gutterBottom>
-              <div className="input-item-contain">
-                <p>
-                  Password<span>*</span>
-                </p>
-                <input />
-                <span>Password is required</span>
-              </div>
-            </Typography>
-            <Typography gutterBottom>
-              <div className="input-item-contain">
-                <p>
-                  Password confirmation<span>*</span>
-                </p>
-                <input />
-                <span>Password confirmation is required</span>
-              </div>
-            </Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button className="btn btn-update" onClick={handleClose}>
-              Update
-            </Button>
-            <Button className="btn btn-cancel" onClick={handleClose}>
-              Cancel
-            </Button>
-          </DialogActions>
+          <form onSubmit={handleSubmit(updateInformAccountUser)}>
+            <DialogContent dividers className="dialog-content">
+              <Typography gutterBottom>
+                <div className="input-item-contain">
+                  <p>
+                    Id<span>*</span>
+                  </p>
+                  <input
+                    className="input-value-default"
+                    value={userEdit.userId}
+                    {...register('id')}
+                  />
+                </div>
+              </Typography>
+              <Typography gutterBottom>
+                <div className="input-item-contain">
+                  <p>
+                    Email<span>*</span>
+                  </p>
+                  <input
+                    className={errors.email?.message ? 'input-err' : ''}
+                    value={emailEdit}
+                    {...register('email', {
+                      onChange: (e) => setEmailEdit(e.target.value),
+                      required: 'Email is required!',
+                      pattern: {
+                        value:
+                          /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                        message: 'Email không hợp lệ!',
+                      },
+                    })}
+                  />
+                  {errors.email?.message && (
+                    <span className="text-error">{errors.email?.message}</span>
+                  )}
+                </div>
+              </Typography>
+              <Typography gutterBottom>
+                <div className="input-item-contain">
+                  <p>
+                    Name<span>*</span>
+                  </p>
+                  <input
+                    className={errors.name?.message ? 'input-err' : ''}
+                    value={nameEdit}
+                    {...register('name', {
+                      onChange: (e) => setNameEdit(e.target.value),
+                      required: 'Name is required',
+                    })}
+                  />
+                  {errors.name?.message && (
+                    <span className="text-error">{errors.name?.message}</span>
+                  )}
+                </div>
+              </Typography>
+              <Typography gutterBottom>
+                <div className="input-item-contain">
+                  <p>Phone number</p>
+                  <input
+                    className={errors.phoneNumber?.message ? 'input-err' : ''}
+                    value={phoneEdit}
+                    {...register('phoneNumber', {
+                      onChange: (e) => setPhoneEdit(e.target.value),
+                      required: 'Phone number is required!',
+                      pattern: {
+                        value: /^[0]+[0-9]{9}$/,
+                        message:
+                          'Phone number must be a number. Number first is 0!',
+                      },
+                    })}
+                  />
+                  {errors.phoneNumber?.message && (
+                    <span className="text-error">
+                      {errors.phoneNumber?.message}
+                    </span>
+                  )}
+                </div>
+              </Typography>
+              <Typography gutterBottom>
+                <div className="input-item-contain">
+                  <p>
+                    Password<span>*</span>
+                  </p>
+                  <input
+                    type={showPassword ? 'password' : 'text'}
+                    className={errors.password?.message ? 'input-err' : ''}
+                    {...register('password', {
+                      required: 'Password is required!',
+                      minLength: {
+                        value: 6,
+                        message: 'Password must have 6-50 character!',
+                      },
+                      maxLength: {
+                        value: 50,
+                        message: 'Password must have 6-50 character!',
+                      },
+                    })}
+                  />
+                  {errors.password?.message && (
+                    <span className="text-error">
+                      {errors.password?.message}
+                    </span>
+                  )}
+                  <span
+                    className="icon-show-password"
+                    onClick={() => setShowPassword(!showPassword)}
+                    role="presentation"
+                  >
+                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                  </span>
+                </div>
+              </Typography>
+              <Typography gutterBottom>
+                <div className="input-item-contain">
+                  <p>
+                    Password confirmation<span>*</span>
+                  </p>
+                  <input
+                    type={showConfirmPassword ? 'password' : 'text'}
+                    className={
+                      errors.passwordConfirmation?.message ? 'input-err' : ''
+                    }
+                    {...register('passwordConfirmation', {
+                      required: 'Password confirmation is required',
+                      validate: (val: string) => {
+                        if (watch('password') !== val) {
+                          return 'Password confirmation does not match';
+                        }
+                      },
+                    })}
+                  />
+                  {errors.passwordConfirmation?.message && (
+                    <span className="text-error">
+                      {errors.passwordConfirmation?.message}
+                    </span>
+                  )}
+                  <span
+                    className="icon-show-password"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    role="presentation"
+                  >
+                    {showConfirmPassword ? (
+                      <VisibilityOffIcon />
+                    ) : (
+                      <VisibilityIcon />
+                    )}
+                  </span>
+                </div>
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button type="submit" className="btn btn-update">
+                Update
+              </Button>
+              <Button className="btn btn-cancel" onClick={handleClose}>
+                Cancel
+              </Button>
+            </DialogActions>
+          </form>
         </BootstrapDialog>
         <MenuContain
           id="basic-menu"
@@ -492,11 +692,106 @@ const Users = () => {
               <Button className="btn btn-no" onClick={handleCloseMenuCancel}>
                 No
               </Button>
-              <Button className="btn btn-yes">Yes</Button>
+              <Button className="btn btn-yes" onClick={handleDeleteUser}>
+                Yes
+              </Button>
             </div>
           </div>
         </MenuContain>
       </UserContain>
+      <DialogSignInSuccessContain
+        open={openProcessUpdate}
+        onClose={handleCloseOpenProcessUpdate}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            width: '30%',
+            minWidth: '380px',
+          },
+        }}
+      >
+        <DialogTitle id="alert-dialog-title">
+          <div className="x-mark-contain">
+            <span className="x-mark-item x-mark-left" />
+            <span className="x-mark-item x-mark-right" />
+          </div>
+        </DialogTitle>
+        <DialogContent id="dialog-content">
+          <h3>{dataEditUser.content}</h3>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleCloseOpenProcessUpdate}
+            autoFocus
+            className="btn-dialog"
+          >
+            ok
+          </Button>
+        </DialogActions>
+      </DialogSignInSuccessContain>
+      <DialogSignInSuccessContain
+        open={openDeleteSuccess}
+        onClose={handleDialogDeleteSuccess}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            width: '30%',
+            minWidth: '380px',
+          },
+        }}
+      >
+        <DialogTitle id="alert-dialog-title">
+          <div className="x-mark-contain">
+            <span className="x-mark-item x-mark-left" />
+            <span className="x-mark-item x-mark-right" />
+          </div>
+        </DialogTitle>
+        <DialogContent id="dialog-content">
+          <h3>{DataDeleteUser.content}</h3>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleDialogDeleteSuccess}
+            autoFocus
+            className="btn-dialog"
+          >
+            ok
+          </Button>
+        </DialogActions>
+      </DialogSignInSuccessContain>
+      <DialogSignInErrorContain
+        open={openDeleteError}
+        onClose={handleDialogDeleteError}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            width: '30%',
+            minWidth: '380px',
+          },
+        }}
+      >
+        <DialogTitle id="alert-dialog-title">
+          <div className="x-mark-contain">
+            <span className="x-mark-item x-mark-left" />
+            <span className="x-mark-item x-mark-right" />
+          </div>
+        </DialogTitle>
+        <DialogContent id="dialog-content">
+          <h3>{errorDeleteUser}</h3>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleDialogDeleteError}
+            autoFocus
+            className="btn-dialog"
+          >
+            ok
+          </Button>
+        </DialogActions>
+      </DialogSignInErrorContain>
     </>
   );
 };

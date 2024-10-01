@@ -1,3 +1,3 @@
 export interface UserResponse {
-    id: string;
-  }
+  id: string;
+}

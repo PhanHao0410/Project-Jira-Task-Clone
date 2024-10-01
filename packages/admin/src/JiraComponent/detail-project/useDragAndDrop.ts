@@ -5,15 +5,16 @@ export const useDragAndDrop = (initialState: Data[]) => {
   const [isDragging, setIsDragging] = useState(false);
   const [listItems, setListItems] = useState<Data[]>(initialState);
 
+  console.log('check list: ', initialState);
   const handleUpdateList = (id: number, status: Status) => {
-    const card = listItems.find((item) => item.id === id);
+    const card = listItems.find((item) => item.taskId === id);
 
     if (card && card.status !== status) {
       card.status = status;
       if (Array.isArray(listItems)) {
         setListItems((prev) => [
           card!,
-          ...prev.filter((item) => item.id !== id),
+          ...prev.filter((item) => item.taskId !== id),
         ]);
       }
     }
