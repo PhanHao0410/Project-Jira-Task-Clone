@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { observer } from 'mobx-react-lite';
 import { EditorState } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
+import { convertToHTML } from 'draft-convert';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SettingsIcon from '@mui/icons-material/Settings';
 import Tooltip from '@mui/material/Tooltip';
@@ -17,6 +18,11 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Slider from '@mui/material/Slider';
 import { Button } from '@mui/material';
 import { useMediaQuery } from '@material-ui/core';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
 import history from '../../utils/history';
 import path from '../../constants/clientPath';
 import { useStoreMobx } from '../../mobx/hook';
@@ -34,6 +40,8 @@ import {
   MenuShowContain,
   DrawerCreateTaskContain,
   FormCreateTaskContain,
+  DialogCreateTaskSuccess,
+  DialogCreateTaskFail,
 } from './styles';
 
 interface ICreateTaskForm {
@@ -48,7 +56,12 @@ interface ICreateTaskForm {
 
 const AppBar = (props) => {
   const {
-    rootStore: { projectsStore, appbarStore, createProjectStore },
+    rootStore: {
+      projectsStore,
+      appbarStore,
+      createProjectStore,
+      projectDetailStore,
+    },
   } = useStoreMobx();
   const {
     register,
@@ -67,8 +80,12 @@ const AppBar = (props) => {
   const dataPriority = appbarStore.getDataPriority;
   const dataTaskType = appbarStore.getDataTaskType;
   const dataUserProject = createProjectStore.getDataUserByProjectId;
+  const dataCreateTask = projectDetailStore.getDataCreateTask;
+  const errorCreateTask = projectDetailStore.getErrorCreateTask;
   const ProjectName = watch('project');
   const [valueProject, setValueProject] = useState<number>();
+  const [openSuccess, setOpenSuccess] = useState(false);
+  const [openFail, setOpenFail] = useState(false);
   const [openDrawer, setOpenDrawer] = React.useState(false);
   const [project, setProject] = React.useState('');
   const [status, setStatus] = React.useState(1);
@@ -76,6 +93,7 @@ const AppBar = (props) => {
   const [taskType, setTaskType] = React.useState('');
   const [estimateHour, setEstimateHour] = React.useState('0');
   const [spentHour, setSpentHour] = React.useState('0');
+  const [listAssignees, setListAssignees] = useState([]);
   const [anchorElSetting, setAnchorElSetting] =
     React.useState<null | HTMLElement>(null);
   const openSetting = Boolean(anchorElSetting);
@@ -107,6 +125,17 @@ const AppBar = (props) => {
     }
   }, [ProjectName, dataAllProject]);
 
+  useEffect(() => {
+    if (dataCreateTask?.content) {
+      setOpenSuccess(true);
+    } else if (errorCreateTask?.content) {
+      setOpenFail(true);
+    } else {
+      setOpenFail(false);
+      setOpenSuccess(false);
+    }
+  }, [dataCreateTask, errorCreateTask]);
+
   const handleChangeProject = (event: SelectChangeEvent) => {
     setProject(event.target.value as string);
   };
@@ -135,6 +164,16 @@ const AppBar = (props) => {
     history.push(path.ACCOUNTS);
   };
 
+  const handleCloseSuccess = () => {
+    setOpenSuccess(false);
+    projectDetailStore.setResetStateCreateTask();
+  };
+
+  const handleCloseCreateFail = () => {
+    setOpenFail(false);
+    projectDetailStore.setResetStateCreateTask();
+  };
+
   const handleLogOutAccount = () => {
     setAnchorElAccount(null);
     removeToken();
@@ -142,8 +181,34 @@ const AppBar = (props) => {
     history.push(path.ROOT);
   };
 
+  const handleAssignees = (e, newValue) => {
+    const check = newValue.map((item) => item.userId);
+    setListAssignees(check);
+  };
+
   const handleSubmitCreateTask = (data) => {
-    console.log('check data submit: ', data);
+    const description = convertToHTML(editorState.getCurrentContent());
+    const listUserAsign = listAssignees;
+    const originalEstimate = Number(estimateHour);
+    const timeTrackingSpent = Number(spentHour);
+    const timeTrackingRemaining = originalEstimate - timeTrackingSpent;
+    const priorityId = Number(data.priorityId);
+    const projectId = data.project;
+    const statusId = data.statusId;
+    const taskName = data.taskName;
+    const typeId = Number(data.taskTypeId);
+    projectDetailStore.fetchCreateTaskProject({
+      description,
+      listUserAsign,
+      originalEstimate,
+      timeTrackingSpent,
+      timeTrackingRemaining,
+      priorityId,
+      projectId,
+      statusId,
+      taskName,
+      typeId,
+    });
   };
 
   return (
@@ -427,6 +492,7 @@ const AppBar = (props) => {
                           displayEmpty
                           inputProps={{ 'aria-label': 'Without label' }}
                           defaultValue={dataTaskType[0].id}
+                          {...register('taskTypeId')}
                         >
                           {dataTaskType.map((item) => {
                             return (
@@ -445,25 +511,26 @@ const AppBar = (props) => {
                   </div>
                 )}
               </div>
-              <div className="field-item-contain">
+              <div className="field-item-assign">
                 <p className="title-item">Assigners</p>
-                <FormControl sx={{ minWidth: 120, width: '100%' }}>
-                  <Select
-                    displayEmpty
-                    inputProps={{ 'aria-label': 'Without label' }}
-                    {...register('assignerId')}
-                  >
-                    {dataUserProject &&
-                      dataUserProject.length > 0 &&
-                      dataUserProject.map((item) => {
-                        return (
-                          <MenuItem value={item.userId} key={item.userId}>
-                            {item.name}
-                          </MenuItem>
-                        );
-                      })}
-                  </Select>
-                </FormControl>
+                <Autocomplete
+                  multiple
+                  id="size-small-outlined-multi"
+                  size="small"
+                  onChange={(event, newvalue) =>
+                    handleAssignees(event, newvalue)
+                  }
+                  fullWidth={true}
+                  options={dataUserProject}
+                  getOptionLabel={(dataUserProject) => dataUserProject.name}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="Choose assignees..."
+                      {...register('assignerId')}
+                    />
+                  )}
+                />
               </div>
               <div style={{ paddingTop: '5px' }}>
                 <p className="title-item">Time Tracking</p>
@@ -520,13 +587,15 @@ const AppBar = (props) => {
                     wrapperClassName="wrapper-class"
                     editorClassName="editor-class"
                     toolbarClassName="toolbar-class"
-                    {...register('description', {
-                      required: 'Description is required',
-                    })}
+                    // {...register('description', {
+                    //   required: 'Description is required',
+                    // })}
                   />
-                  {errors.description?.message && (
-                    <p>{errors.description?.message}</p>
-                  )}
+                  {/* {errors.description?.message && (
+                    <p style={{ color: 'red' }}>
+                      {errors.description?.message}
+                    </p>
+                  )} */}
                 </div>
               </div>
             </FormCreateTaskContain>
@@ -544,6 +613,66 @@ const AppBar = (props) => {
           </form>
         </Box>
       </DrawerCreateTaskContain>
+      <DialogCreateTaskSuccess
+        open={openSuccess}
+        onClose={handleCloseSuccess}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            width: '30%',
+            minWidth: '380px',
+          },
+        }}
+      >
+        <DialogTitle id="alert-dialog-title">
+          <div className="x-mark-contain">
+            <span className="x-mark-item x-mark-left" />
+            <span className="x-mark-item x-mark-right" />
+          </div>
+        </DialogTitle>
+        <DialogContent id="dialog-content">
+          <h3>Welcome to Jira!</h3>
+          <p>{dataCreateTask?.message}</p>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseSuccess} autoFocus className="btn-dialog">
+            ok
+          </Button>
+        </DialogActions>
+      </DialogCreateTaskSuccess>
+      <DialogCreateTaskFail
+        open={openFail}
+        onClose={handleCloseCreateFail}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            width: '30%',
+            minWidth: '380px',
+          },
+        }}
+      >
+        <DialogTitle id="alert-dialog-title">
+          <div className="x-mark-contain">
+            <span className="x-mark-item x-mark-left" />
+            <span className="x-mark-item x-mark-right" />
+          </div>
+        </DialogTitle>
+        <DialogContent id="dialog-content">
+          <h3>Awwww!</h3>
+          <p>{errorCreateTask?.content}</p>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleCloseCreateFail}
+            autoFocus
+            className="btn-dialog"
+          >
+            ok
+          </Button>
+        </DialogActions>
+      </DialogCreateTaskFail>
     </AppBarContain>
   );
 };

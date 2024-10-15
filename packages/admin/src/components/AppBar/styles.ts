@@ -3,6 +3,7 @@ import Menu from '@mui/material/Menu';
 import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import { devices } from '../../JiraComponent/DeviceScreen';
+import { Dialog } from '@mui/material';
 
 export const AppBarContain = styled.div`
   width: 100vw;
@@ -265,6 +266,12 @@ export const FormCreateTaskContain = styled.div`
       top: -5px;
     }
   }
+  .field-item-assign {
+    margin-bottom: 15px;
+    .title-item {
+      margin-bottom: 7px;
+    }
+  }
   .field-item-45 {
     width: 45%;
 
@@ -292,5 +299,214 @@ export const FormCreateTaskContain = styled.div`
     display: flex;
     width: 100%;
     justify-content: space-between;
+  }
+`;
+
+export const DialogCreateTaskSuccess = styled(Dialog)`
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  font-size: 1rem;
+  line-height: 1.2;
+  box-sizing: border-box;
+  #alert-dialog-title {
+    width: 100px;
+    height: 100px;
+    margin: 30px auto;
+    border: 5px solid #a5dc86;
+    border-radius: 50%;
+    animation: animationErrorIcon 0.5s;
+    .x-mark-contain {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: animateXMark 0.8s;
+      .x-mark-item {
+        height: 5px;
+        background-color: #a5dc86;
+        border-radius: 2px;
+        position: absolute;
+      }
+      .x-mark-left {
+        width: 47px;
+        left: 10px;
+        top: 28px;
+        transform: rotate(-45deg);
+      }
+      .x-mark-right {
+        width: 25px;
+        left: -4px;
+        top: 35px;
+        transform: rotate(45deg);
+      }
+    }
+  }
+  #dialog-content {
+    height: 100%;
+    text-align: center;
+    .image-error-contain {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      .image-error-item {
+        width: 100%;
+        height: 180px;
+        @media ${devices.maxpn} {
+          width: 100%;
+          height: 150px;
+        }
+      }
+    }
+    h3 {
+      font-size: 18px;
+      width: 100%;
+    }
+    p {
+      display: flex;
+      justify-content: center;
+      color: RGB(130 130 130);
+    }
+  }
+  .btn-dialog {
+    color: white;
+    padding: 10px 25px;
+    min-height: 0px;
+    min-width: 0px;
+    background-color: RGB(115 209 252);
+    margin-bottom: 15px;
+    margin-right: 15px;
+    &:hover {
+      background-color: RGB(77 192 246);
+    }
+  }
+  @keyframes animationErrorIcon {
+    0% {
+      transform: rotateX(100deg);
+      opacity: 0;
+    }
+    100% {
+      transform: rotateX(0deg);
+      opacity: 1;
+    }
+  }
+  @keyframes animateXMark {
+    0% {
+      transform: scale(0.4);
+      margin-top: 26px;
+      opacity: 0;
+    }
+    50% {
+      transform: scale(0.4);
+      margin-top: 26px;
+      opacity: 0;
+    }
+    80% {
+      transform: scale(1.15);
+      margin-top: -6px;
+    }
+    100% {
+      transform: scale(1);
+      margin-top: 0;
+      opacity: 1;
+    }
+  }
+`;
+export const DialogCreateTaskFail = styled(Dialog)`
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  font-size: 1rem;
+  line-height: 1.2;
+  box-sizing: border-box;
+  #alert-dialog-title {
+    width: 100px;
+    height: 100px;
+    margin: 30px auto;
+    border: 5px solid rgb(242, 116, 116);
+    border-radius: 50%;
+    animation: animationErrorIcon 0.5s;
+    .x-mark-contain {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: animateXMark 0.8s;
+      .x-mark-item {
+        height: 5px;
+        width: 57px;
+        background-color: rgb(242, 116, 116);
+        border-radius: 2px;
+        position: absolute;
+      }
+      .x-mark-left {
+        transform: rotate(45deg);
+      }
+      .x-mark-right {
+        transform: rotate(-45deg);
+      }
+    }
+  }
+  #dialog-content {
+    height: 100%;
+    h3 {
+      font-size: 24px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+    p {
+      display: flex;
+      justify-content: center;
+      color: RGB(130 130 130);
+    }
+  }
+  .btn-dialog {
+    color: white;
+    padding: 10px 25px;
+    min-height: 0px;
+    min-width: 0px;
+    background-color: RGB(115 209 252);
+    margin-bottom: 15px;
+    margin-right: 15px;
+    &:hover {
+      background-color: RGB(77 192 246);
+    }
+  }
+  @keyframes animationErrorIcon {
+    0% {
+      transform: rotateX(100deg);
+      opacity: 0;
+    }
+    100% {
+      transform: rotateX(0deg);
+      opacity: 1;
+    }
+  }
+  @keyframes animateXMark {
+    0% {
+      transform: scale(0.4);
+      margin-top: 26px;
+      opacity: 0;
+    }
+    50% {
+      transform: scale(0.4);
+      margin-top: 26px;
+      opacity: 0;
+    }
+    80% {
+      transform: scale(1.15);
+      margin-top: -6px;
+    }
+    100% {
+      transform: scale(1);
+      margin-top: 0;
+      opacity: 1;
+    }
   }
 `;

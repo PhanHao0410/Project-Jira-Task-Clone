@@ -5,7 +5,6 @@ export const useDragAndDrop = (initialState: Data[]) => {
   const [isDragging, setIsDragging] = useState(false);
   const [listItems, setListItems] = useState<Data[]>(initialState);
 
-  console.log('check list: ', initialState);
   const handleUpdateList = (id: number, status: Status) => {
     const card = listItems.find((item) => item.taskId === id);
 

@@ -184,7 +184,12 @@ const Projects = () => {
     setSelectAction(id);
   };
   const handleClickEditProject = () => {
-    history.push(`/pj/${4567}/edit`);
+    history.push(`/projectss/${selectAction}/edit`);
+    setAnchorEl(null);
+  };
+
+  const handleClickEditProjectMobile = (id) => {
+    history.push(`/projectss/${id}/edit`);
     setAnchorEl(null);
   };
 
@@ -592,7 +597,7 @@ const Projects = () => {
                           color: 'rgb(37,84,217)',
                           cursor: 'pointer',
                         }}
-                        onClick={handleClickEditProject}
+                        onClick={() => handleClickEditProjectMobile(item.id)}
                         role="presentation"
                       >
                         <DriveFileRenameOutlineIcon />

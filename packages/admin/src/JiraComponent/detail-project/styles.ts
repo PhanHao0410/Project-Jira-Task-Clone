@@ -151,6 +151,48 @@ export const CardContain = styled.div`
       background-color: RGB(206 206 206);
     }
   }
+  .fill-stask-contain {
+    border-radius: 4px;
+    position: relative;
+    border: 2px solid RGB(62 171 239);
+    background-color: white;
+    .close-task-form {
+      position: absolute;
+      top: -20px;
+      right: -10px;
+      cursor: pointer;
+      color: RGB(130 129 129);
+      :hover {
+        color: RGB(229 73 58);
+      }
+      .icon-close {
+        transform: scale(1);
+      }
+    }
+    textarea {
+      width: 100%;
+      border: none;
+      outline: none;
+      padding: 8px;
+      font-size: 16px;
+      height: 60px;
+    }
+    .task-contain {
+      display: flex;
+      align-items: center;
+      padding: 4px 10px;
+      cursor: pointer;
+      width: 60px;
+      .icon-task {
+        transform: scale(0.9);
+        color: rgb(75, 173, 232);
+      }
+      .icon-bug {
+        transform: scale(0.9);
+        color: rgb(229, 73, 58);
+      }
+    }
+  }
 `;
 export const CardItemContent = styled.div`
   padding: 10px 8px;
@@ -170,16 +212,26 @@ export const CardItemContent = styled.div`
       display: flex;
       align-items: center;
       p {
-        padding: 2px 4px;
-        color: rgb(193, 54, 54);
+        padding: 3px 4px;
         font-size: 13px;
-        border: 1px solid rgb(193, 54, 54);
         border-radius: 3px;
         line-height: 0.8rem;
+      }
+      .text-priorityTask {
+        border: 1px solid RGB(203 203 203);
+      }
+      .text-priorityTask-err {
+        color: rgb(193, 54, 54);
+        border: 1px solid rgb(193, 54, 54);
       }
       .icon-priority {
         margin-right: 3px;
         color: rgb(75, 173, 232);
+        transform: scale(0.9);
+      }
+      .icon-priority-bug {
+        margin-right: 3px;
+        color: rgb(229, 73, 58);
         transform: scale(0.9);
       }
     }
@@ -831,6 +883,55 @@ export const DialogSignInErrorContain = styled(Dialog)`
       transform: scale(1);
       margin-top: 0;
       opacity: 1;
+    }
+  }
+`;
+
+export const DialogDeleteTask = styled(Dialog)`
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  font-size: 1rem;
+  line-height: 1.2;
+  box-sizing: border-box;
+  #alert-dialog-title {
+    display: flex;
+    align-items: center;
+    .icon-error-title {
+      margin-right: 8px;
+      color: rgb(222, 53, 11);
+    }
+    h5 {
+      font-size: 20px;
+      font-weight: 500;
+    }
+  }
+  #dialog-content {
+    p {
+      color: rgb(47, 47, 47);
+      font-size: 15px;
+      line-height: 1.75;
+    }
+  }
+  #dialog-action {
+    margin-right: 10px;
+    margin-bottom: 10px;
+  }
+  .btn-submit {
+    color: white;
+    text-transform: none;
+    padding: 4px 13px;
+    background-color: rgb(220, 38, 38);
+    :hover {
+      background-color: RGB(214 74 74);
+    }
+  }
+  .btn-cancel {
+    color: black;
+    text-transform: none;
+    padding: 4px 13px;
+    :hover {
+      background-color: RGB(190 190 190);
     }
   }
 `;

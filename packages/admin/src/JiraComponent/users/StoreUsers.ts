@@ -86,7 +86,6 @@ export class UserStore {
     } catch (e) {
       this.isLoading = false;
       this.editUserData = {};
-      console.log('check err edit: ', e.response);
     }
   };
 

@@ -6,6 +6,7 @@ import {
   ProjectIdForm,
   CreateProjectForm,
   AssignUserForm,
+  UpdateStatusForm,
 } from '../types/Requests';
 import { UserResponse } from '../types/Responses';
 
@@ -73,8 +74,47 @@ const getAllPriority = (): Promise<AxiosResponse> => {
   return BaseService.get(`${BASE_URL}/Priority/getAll`);
 };
 
+const updatePriority = (data): Promise<AxiosResponse> => {
+  return BaseService.put(`${BASE_URL}/Project/updatePriority`, data);
+};
+
 const ProjectDetail = (data): Promise<AxiosResponse> => {
   return BaseService.get(`${BASE_URL}/Project/getProjectDetail?id=${data}`);
+};
+
+const updateStatus = (data: UpdateStatusForm): Promise<AxiosResponse> => {
+  return BaseService.put(`${BASE_URL}/Project/updateStatus`, data);
+};
+
+const getTaskDetail = (data): Promise<AxiosResponse> => {
+  return BaseService.get(`${BASE_URL}/Project/getTaskDetail?taskId=${data}`);
+};
+
+const updateTask = (data): Promise<AxiosResponse> => {
+  return BaseService.post(`${BASE_URL}/Project/updateTask`, data);
+};
+
+const updateEstimate = (data): Promise<AxiosResponse> => {
+  return BaseService.put(`${BASE_URL}/Project/updateEstimate`, data);
+};
+
+const updateTimeTracking = (data): Promise<AxiosResponse> => {
+  return BaseService.put(`${BASE_URL}/Project/updateTimeTracking`, data);
+};
+
+const projectCreateTask = (data): Promise<AxiosResponse> => {
+  return BaseService.post(`${BASE_URL}/Project/createTask`, data);
+};
+
+const removeTaskProject = (data): Promise<AxiosResponse> => {
+  return BaseService.delete(`${BASE_URL}/Project/removeTask?taskId=${data}`);
+};
+
+const updateProject = (data): Promise<AxiosResponse> => {
+  return BaseService.put(
+    `${BASE_URL}/Project/updateProject?projectId=${data.projectId}`,
+    data.dataPayload,
+  );
 };
 
 export default {
@@ -93,4 +133,13 @@ export default {
   getAllTaskType,
   getAllPriority,
   ProjectDetail,
+  updateStatus,
+  getTaskDetail,
+  updateTask,
+  updatePriority,
+  updateEstimate,
+  updateTimeTracking,
+  projectCreateTask,
+  removeTaskProject,
+  updateProject,
 };

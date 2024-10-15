@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import Button from '@mui/material/Button';
 import DialogActions from '@mui/material/DialogActions';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -7,15 +8,12 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import MenuItem from '@mui/material/MenuItem';
-import ReportGmailerrorredIcon from '@mui/icons-material/ReportGmailerrorred';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import Autocomplete from '@mui/material/Autocomplete';
 import Slider from '@mui/material/Slider';
-import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import TextField from '@mui/material/TextField';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import SyncAltIcon from '@mui/icons-material/SyncAlt';
@@ -23,6 +21,9 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
+import BugReportIcon from '@mui/icons-material/BugReport';
+import ReportIcon from '@mui/icons-material/Report';
+import { useStoreMobx } from '../../mobx/hook';
 import { Data } from '../../types/Requests';
 import WordEmbed from '../../components/word-embed';
 
@@ -35,32 +36,33 @@ import {
   PriorityContentContain,
   MenuItemContain,
   DialogTimeTrackingContain,
+  DialogSignInErrorContain,
+  DialogDeleteTask,
 } from './styles';
 
 interface Props {
   data: Data;
-  handleDragging: (dragging: boolean) => void;
   isDragging: boolean;
 }
-const top100Films = [
-  { title: 'The Shawshank Redemption', year: 1994 },
-  { title: 'The Godfather', year: 1972 },
-  { title: 'The Godfather: Part II', year: 1974 },
-  { title: 'The Dark Knight', year: 2008 },
-  { title: '12 Angry Men', year: 1957 },
-  { title: "Schindler's List", year: 1993 },
-  { title: 'Pulp Fiction', year: 1994 },
-  {
-    title: 'The Lord of the Rings: The Return of the King',
-    year: 2003,
-  },
-  { title: 'The Good, the Bad and the Ugly', year: 1966 },
-  { title: 'Fight Club', year: 1999 },
-];
 
-const CardItem = ({ data, handleDragging }: Props) => {
+const CardItem = ({ data, projectId, dataUserByProject, clickTaskItem }) => {
+  const {
+    rootStore: { projectDetailStore },
+  } = useStoreMobx();
+  const dataTaskDetail = projectDetailStore.getDataTaskDetail;
+  const dataUpdateTask = projectDetailStore.getDataUpdateTask;
+  const errorUpdateTask = projectDetailStore.getErrorUpdateTask;
+  const dataUpdatePriority = projectDetailStore.getDataUpdatePriority;
+  const errorUpdatePriority = projectDetailStore.getErrorUpdatePriority;
+  const errorUpdateEstimate = projectDetailStore.getErrorUpdateEstimate;
+  const errorUpdateTimeTracking = projectDetailStore.getErrorUpdateTimeTracking;
+  const dataUpdateTimeTracking = projectDetailStore.getDataUpdateTimeTracking;
+  const errorDeleteTask = projectDetailStore.getErrorDeleteTask;
+  const dataDeleteTask = projectDetailStore.getDataDeleteTask;
+  const dataUpdateEstimate = projectDetailStore.getDataUpdateEstimate;
+
   const [open, setOpen] = React.useState(false);
-  const [typeTask, setTypeTask] = useState('bug');
+  const [openDeleteTask, setOpenDeleteTask] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -68,12 +70,67 @@ const CardItem = ({ data, handleDragging }: Props) => {
   const [projectCategory, setProjectCategory] = React.useState('');
   const [valuePriority, setValuePriority] = useState('hight');
   const [showEstimate, setShowEstimate] = useState(false);
-  const [valueEstimate, setValueEstimate] = useState('2');
-  const [sliderSpent, setSliderSpent] = useState<number>(1);
+  const [valueEstimate, setValueEstimate] = useState<any>();
+  const [sliderSpent, setSliderSpent] = useState<string>('');
+  const [idTask, setIdTask] = useState<number>();
+  const [openErrorCardItem, setOpenErrorCardItem] = useState(false);
+  const [valueAssignees, setValueAssignees] = useState<any>();
   const [anchorElPriority, setAnchorElPriority] =
     React.useState<null | HTMLElement>(null);
   const [openTimeTracking, setOpenTimeTracking] = React.useState(false);
-  // console.log('check item: ', data);
+  const openPriority = Boolean(anchorElPriority);
+  useEffect(() => {
+    if (open && idTask) {
+      projectDetailStore.fetchTaskDetail(idTask);
+    }
+    if (dataUpdateTimeTracking?.content) {
+      setOpenTimeTracking(false);
+      setSliderSpent('');
+    }
+    if (dataUpdateEstimate?.content) {
+      setShowEstimate(false);
+      projectDetailStore.setResetStateUpdateEstimate();
+    }
+  }, [
+    open,
+    dataUpdateTask,
+    dataUpdatePriority,
+    dataUpdateEstimate,
+    dataUpdateTimeTracking,
+  ]);
+
+  useEffect(() => {
+    if (
+      errorUpdateTask?.content ||
+      errorUpdatePriority?.content ||
+      errorUpdateEstimate?.content ||
+      errorUpdateTimeTracking?.content ||
+      errorDeleteTask?.content
+    ) {
+      setOpenErrorCardItem(true);
+    } else {
+      setOpenErrorCardItem(false);
+    }
+  }, [
+    errorUpdateTask,
+    errorUpdatePriority,
+    errorUpdateEstimate,
+    errorUpdateTimeTracking,
+    errorDeleteTask,
+  ]);
+
+  useEffect(() => {
+    const commonIds = dataUserByProject
+      .map((item) => item.userId)
+      .filter((id) =>
+        dataTaskDetail?.assigness?.some((item) => item.id === id),
+      );
+    const filteredArray1 = dataUserByProject.filter((item) =>
+      commonIds.includes(item.userId),
+    );
+    setValueAssignees(filteredArray1);
+    setValueEstimate(dataTaskDetail?.originalEstimate);
+  }, [dataTaskDetail, errorUpdateEstimate]);
 
   const handleClickOpenTimeTracking = () => {
     setOpenTimeTracking(true);
@@ -81,8 +138,8 @@ const CardItem = ({ data, handleDragging }: Props) => {
 
   const handleCloseTimeTracking = () => {
     setOpenTimeTracking(false);
+    setSliderSpent('');
   };
-  const openPriority = Boolean(anchorElPriority);
   const handleClickPriority = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorElPriority(event.currentTarget);
   };
@@ -96,45 +153,110 @@ const CardItem = ({ data, handleDragging }: Props) => {
   const handleCloseMenu = () => {
     setAnchorEl(null);
   };
-  const handleClickTaskBug = () => {
+  const handleClickTask = (idType) => {
     setAnchorEl(null);
-    setTypeTask('bug');
-  };
-  const handleClickTaskNew = () => {
-    setAnchorEl(null);
-    setTypeTask('newTask');
+    const dataTaskCopy = { ...dataTaskDetail, typeId: idType };
+    projectDetailStore.fetchUpdateTask(dataTaskCopy);
   };
 
-  const handleClickOpen = () => {
+  const handleClickOpen = (id) => {
+    setIdTask(id);
     setOpen(true);
   };
 
   const handleClose = () => {
+    setIdTask(null);
+    projectDetailStore.setResetStateTaskDetail();
     setOpen(false);
   };
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    e.dataTransfer.setData('text', `${data.taskId}`);
-    handleDragging(true);
+
+  const handleCloseDialogDeleteTask = () => {
+    setOpenDeleteTask(false);
   };
-  const handleDragEnd = () => handleDragging(false);
+
+  const handleClickDeleteTask = () => {
+    projectDetailStore.fetchDeleteTaskProject(idTask);
+  };
+
   const handleChange = (event: SelectChangeEvent) => {
-    setProjectCategory(event.target.value);
+    const taskId = dataTaskDetail?.taskId;
+    const statusId = event.target.value.toString();
+    projectDetailStore.fetchUpdateStatus({ taskId, statusId });
+  };
+
+  const handleCloseHideError = () => {
+    setOpenErrorCardItem(false);
+    projectDetailStore.setResetStateUpdateTask();
+    projectDetailStore.setResetStateUpdateTask();
+    projectDetailStore.setResetStateUpdatePriority();
+    projectDetailStore.setResetStateUpdateEstimate();
+    projectDetailStore.setResetStateUpdateTimeTracking();
+    projectDetailStore.setResetStateDeleteTask();
+  };
+
+  const handleAssignees = (e, newValue) => {
+    const check = newValue.map((item) => item.userId);
+    const dataTaskCopy = { ...dataTaskDetail, listUserAsign: [...check] };
+    projectDetailStore.fetchUpdateTask(dataTaskCopy);
+  };
+
+  const handleUpdateTaskPriority = (id) => {
+    if (id !== dataTaskDetail?.priorityTask?.priorityId) {
+      const priorityId = id;
+      const taskId = idTask;
+      projectDetailStore.fetchUpdatePriority({ priorityId, taskId });
+    }
+  };
+
+  const handleClickSetUpEstimate = () => {
+    const originalEstimate = Number(valueEstimate);
+    const taskId = idTask;
+    projectDetailStore.fetchUpdateEstimate({ originalEstimate, taskId });
+  };
+
+  const handleClickUpdateTimeTracking = () => {
+    if (sliderSpent.length > 0) {
+      const taskId = idTask;
+      const timeTrackingSpent =
+        dataTaskDetail?.timeTrackingSpent + Number(sliderSpent);
+
+      const timeTrackingRemaining = (
+        dataTaskDetail?.timeTrackingRemaining - Number(sliderSpent)
+      ).toString();
+      projectDetailStore.fetchUpdateTimeTracking({
+        taskId,
+        timeTrackingSpent,
+        timeTrackingRemaining,
+      });
+    } else {
+      setOpenTimeTracking(false);
+    }
   };
 
   return (
     <>
       <CardItemContent
         draggable
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
         style={{ cursor: 'pointer' }}
-        onClick={handleClickOpen}
+        onClick={() => handleClickOpen(data.taskId)}
       >
         <h3>{data.taskName}</h3>
         <div className="inform-contain">
           <div className="priority-contain">
-            <CheckBoxIcon className="icon-priority" />
-            <p>{data.priorityTask.priority}</p>
+            {data.taskTypeDetail?.id === 1 ? (
+              <BugReportIcon className="icon-priority-bug" />
+            ) : (
+              <CheckBoxIcon className="icon-priority" />
+            )}
+            <p
+              className={
+                data.priorityTask.priorityId === 1
+                  ? 'text-priorityTask-err'
+                  : 'text-priorityTask'
+              }
+            >
+              {data.priorityTask.priority}
+            </p>
           </div>
           <AccountCircleIcon className="icon-avatar" />
         </div>
@@ -155,9 +277,9 @@ const CardItem = ({ data, handleDragging }: Props) => {
             onClick={handleClickMenu}
             role="presentation"
           >
-            {typeTask === 'bug' ? (
+            {dataTaskDetail?.taskTypeDetail?.id === 1 ? (
               <>
-                <ReportGmailerrorredIcon className="icon-bug" />
+                <BugReportIcon className="icon-bug" />
                 <p>Bug</p>
               </>
             ) : (
@@ -168,7 +290,7 @@ const CardItem = ({ data, handleDragging }: Props) => {
             )}
           </div>
           <div className="action-delete-contain">
-            <span>
+            <span onClick={() => setOpenDeleteTask(true)} role="presentation">
               <DeleteOutlineIcon className="icon-delete" />
             </span>
             <span onClick={handleClose} role="presentation">
@@ -178,6 +300,7 @@ const CardItem = ({ data, handleDragging }: Props) => {
         </DialogTitle>
         <DialogCardItemContentContain>
           <div className="description-comment-contain">
+            <h3>{dataTaskDetail.taskName}</h3>
             <div className="description-contain">
               <h3>Description</h3>
               {!showDescription ? (
@@ -186,11 +309,21 @@ const CardItem = ({ data, handleDragging }: Props) => {
                   onClick={() => setShowDescription(true)}
                   role="presentation"
                 >
-                  Add a description...
+                  {dataTaskDetail.description?.length > 7 ? (
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: dataTaskDetail?.description,
+                      }}
+                    />
+                  ) : (
+                    'Add a description...'
+                  )}
                 </div>
               ) : (
                 <div className="word-embed-description">
-                  <WordEmbed />
+                  {dataTaskDetail?.description && (
+                    <WordEmbed textEditor={dataTaskDetail?.description} />
+                  )}
                   <Button className="btn btn-save">Save</Button>
                   <Button
                     className="btn btn-cancel"
@@ -238,17 +371,15 @@ const CardItem = ({ data, handleDragging }: Props) => {
               }}
             >
               <Select
-                value={projectCategory}
+                value={Number(dataTaskDetail?.statusId)}
                 onChange={handleChange}
                 displayEmpty
                 inputProps={{ 'aria-label': 'Without label' }}
               >
-                <MenuItem value="">
-                  <p>Done</p>
-                </MenuItem>
-                <MenuItem value={20}>Backlog</MenuItem>
-                <MenuItem value={30}>In Progress</MenuItem>
-                <MenuItem value={40}>Selected For Development</MenuItem>
+                <MenuItem value={1}>Backlog</MenuItem>
+                <MenuItem value={2}>Selected For Development</MenuItem>
+                <MenuItem value={3}>In Progress</MenuItem>
+                <MenuItem value={4}>Done</MenuItem>
               </Select>
             </FormControl>
             <DetailDialogCardItemContain>
@@ -280,9 +411,19 @@ const CardItem = ({ data, handleDragging }: Props) => {
                     multiple
                     id="size-small-outlined-multi"
                     size="small"
+                    // value={checkTestArray(
+                    //   dataUserByProject,
+                    //   dataTaskDetail?.assigness,
+                    // )}
+                    value={valueAssignees}
+                    onChange={(event, newvalue) =>
+                      handleAssignees(event, newvalue)
+                    }
                     fullWidth={true}
-                    options={top100Films}
-                    getOptionLabel={(option) => option.title}
+                    options={dataUserByProject}
+                    getOptionLabel={(dataUserByProject) =>
+                      dataUserByProject.name
+                    }
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -299,7 +440,7 @@ const CardItem = ({ data, handleDragging }: Props) => {
                       onClick={handleClickPriority}
                       role="presentation"
                     >
-                      {valuePriority === 'hight' && (
+                      {dataTaskDetail?.priorityTask?.priorityId === 1 && (
                         <>
                           <ExpandLessIcon
                             style={{
@@ -309,7 +450,7 @@ const CardItem = ({ data, handleDragging }: Props) => {
                           <p>Hight</p>
                         </>
                       )}
-                      {valuePriority === 'medium' && (
+                      {dataTaskDetail?.priorityTask?.priorityId === 2 && (
                         <>
                           <SyncAltIcon
                             style={{
@@ -320,7 +461,7 @@ const CardItem = ({ data, handleDragging }: Props) => {
                           <p>Medium</p>
                         </>
                       )}
-                      {valuePriority === 'low' && (
+                      {dataTaskDetail?.priorityTask?.priorityId === 3 && (
                         <>
                           <KeyboardArrowDownIcon
                             style={{
@@ -330,7 +471,7 @@ const CardItem = ({ data, handleDragging }: Props) => {
                           <p>Low</p>
                         </>
                       )}
-                      {valuePriority === 'lowest' && (
+                      {dataTaskDetail?.priorityTask?.priorityId === 4 && (
                         <>
                           <KeyboardDoubleArrowDownIcon
                             style={{
@@ -352,10 +493,12 @@ const CardItem = ({ data, handleDragging }: Props) => {
                     >
                       <MenuItem
                         className={
-                          valuePriority === 'hight' ? 'priority-active' : ''
+                          dataTaskDetail?.priorityTask?.priorityId === 1
+                            ? 'priority-active'
+                            : ''
                         }
                         onClick={() => {
-                          setValuePriority('hight');
+                          handleUpdateTaskPriority(1);
                           setAnchorElPriority(null);
                         }}
                       >
@@ -369,10 +512,12 @@ const CardItem = ({ data, handleDragging }: Props) => {
                       </MenuItem>
                       <MenuItem
                         className={
-                          valuePriority === 'medium' ? 'priority-active' : ''
+                          dataTaskDetail?.priorityTask?.priorityId === 2
+                            ? 'priority-active'
+                            : ''
                         }
                         onClick={() => {
-                          setValuePriority('medium');
+                          handleUpdateTaskPriority(2);
                           setAnchorElPriority(null);
                         }}
                       >
@@ -386,10 +531,12 @@ const CardItem = ({ data, handleDragging }: Props) => {
                       </MenuItem>
                       <MenuItem
                         className={
-                          valuePriority === 'low' ? 'priority-active' : ''
+                          dataTaskDetail?.priorityTask?.priorityId === 3
+                            ? 'priority-active'
+                            : ''
                         }
                         onClick={() => {
-                          setValuePriority('low');
+                          handleUpdateTaskPriority(3);
                           setAnchorElPriority(null);
                         }}
                       >
@@ -402,10 +549,12 @@ const CardItem = ({ data, handleDragging }: Props) => {
                       </MenuItem>
                       <MenuItem
                         className={
-                          valuePriority === 'lowest' ? 'priority-active' : ''
+                          dataTaskDetail?.priorityTask?.priorityId === 4
+                            ? 'priority-active'
+                            : ''
                         }
                         onClick={() => {
-                          setValuePriority('lowest');
+                          handleUpdateTaskPriority(4);
                           setAnchorElPriority(null);
                         }}
                       >
@@ -427,7 +576,7 @@ const CardItem = ({ data, handleDragging }: Props) => {
                       onClick={() => setShowEstimate(true)}
                       role="presentation"
                     >
-                      <span>{`${valueEstimate}m`}</span>
+                      <span>{`${dataTaskDetail?.originalEstimate}m`}</span>
                     </div>
                   ) : (
                     <div className="input-estimate-contain">
@@ -436,7 +585,10 @@ const CardItem = ({ data, handleDragging }: Props) => {
                         onChange={(e) => setValueEstimate(e.target.value)}
                       />
                       <div className="action-estimate-contain">
-                        <Button className="btn">
+                        <Button
+                          className="btn"
+                          onClick={handleClickSetUpEstimate}
+                        >
                           <CheckIcon style={{ transform: 'scale(0.8)' }} />
                         </Button>
                         <Button
@@ -456,16 +608,19 @@ const CardItem = ({ data, handleDragging }: Props) => {
                     onClick={handleClickOpenTimeTracking}
                     role="presentation"
                   >
-                    <Slider
-                      max={Number(valueEstimate)}
-                      aria-label="Default"
-                      valueLabelDisplay="auto"
-                      value={sliderSpent}
-                    />
+                    {dataTaskDetail?.timeTrackingSpent && (
+                      <Slider
+                        max={dataTaskDetail?.originalEstimate}
+                        aria-label="Default"
+                        valueLabelDisplay="auto"
+                        value={dataTaskDetail?.timeTrackingSpent}
+                      />
+                    )}
                     <div className="time-tracking-title">
-                      <p>{`${sliderSpent}m spent`}</p>
+                      <p>{`${dataTaskDetail?.timeTrackingSpent}m spent`}</p>
                       <p>{`${
-                        Number(valueEstimate) - sliderSpent
+                        Number(dataTaskDetail?.originalEstimate) -
+                        Number(dataTaskDetail?.timeTrackingSpent)
                       }m remaining`}</p>
                     </div>
                   </div>
@@ -485,18 +640,18 @@ const CardItem = ({ data, handleDragging }: Props) => {
         }}
       >
         <MenuItem
-          onClick={handleClickTaskBug}
+          onClick={() => handleClickTask(1)}
           className={`menu-item ${
-            typeTask === 'bug' ? 'menu-item-selected' : ''
+            dataTaskDetail?.taskTypeDetail?.id === 1 ? 'menu-item-selected' : ''
           }`}
         >
-          <ReportGmailerrorredIcon className="icon-bug-item" />
+          <BugReportIcon className="icon-bug-item" />
           <p>Bug</p>
         </MenuItem>
         <MenuItem
-          onClick={handleClickTaskNew}
+          onClick={() => handleClickTask(2)}
           className={`menu-item ${
-            typeTask === 'newTask' ? 'menu-item-selected' : ''
+            dataTaskDetail?.taskTypeDetail?.id === 2 ? 'menu-item-selected' : ''
           }`}
         >
           <CheckBoxIcon className="icon-newtask-item" />
@@ -518,36 +673,52 @@ const CardItem = ({ data, handleDragging }: Props) => {
         <DialogTitle id="alert-dialog-title">Time tracking</DialogTitle>
         <DialogContent id="dialog-content-contain">
           <div>
-            <Slider
-              value={Number(sliderSpent)}
-              max={Number(valueEstimate)}
-              aria-label="Default"
-              valueLabelDisplay="auto"
-              step={1}
-              onChange={(e) => setSliderSpent(e.target.value)}
-            />
+            {dataTaskDetail?.timeTrackingSpent && (
+              <Slider
+                value={dataTaskDetail?.timeTrackingSpent + Number(sliderSpent)}
+                max={dataTaskDetail?.originalEstimate}
+                aria-label="Default"
+                valueLabelDisplay="auto"
+                step={1}
+              />
+            )}
             <div className="dialog-timetracking-slider">
-              <p>{`${sliderSpent}m spent`}</p>
-              <p>{`${Number(valueEstimate) - sliderSpent}m remaining`}</p>
+              <p>{`${
+                dataTaskDetail?.timeTrackingSpent + Number(sliderSpent)
+              }m spent`}</p>
+              <p>{`${
+                Number(dataTaskDetail?.originalEstimate) -
+                Number(dataTaskDetail?.timeTrackingSpent) -
+                Number(sliderSpent)
+              }m remaining`}</p>
             </div>
           </div>
-          <h3>{`The original estimate for this issue was ${valueEstimate}m.`}</h3>
+          <h3>{`The original estimate for this issue was ${dataTaskDetail?.originalEstimate}m.`}</h3>
           <div className="input-contain">
             <div className="input-dialog-item">
               <p>Time spent</p>
               <input
-                value={sliderSpent.toString()}
-                onChange={(e) => setSliderSpent(Number(e.target.value))}
+                value={sliderSpent}
+                onChange={(e) => setSliderSpent(e.target.value)}
               />
             </div>
             <div className="input-dialog-item">
               <p>Time remaining</p>
-              <input value={(Number(valueEstimate) - sliderSpent).toString()} />
+              <input
+                value={(
+                  Number(dataTaskDetail?.originalEstimate) -
+                  Number(dataTaskDetail?.timeTrackingSpent) -
+                  Number(sliderSpent)
+                ).toString()}
+              />
             </div>
           </div>
         </DialogContent>
         <DialogActions id="action-dialog-timetracking">
-          <Button onClick={handleCloseTimeTracking} className="btn btn-save">
+          <Button
+            onClick={handleClickUpdateTimeTracking}
+            className="btn btn-save"
+          >
             Save
           </Button>
           <Button onClick={handleCloseTimeTracking} className="btn btn-cancel">
@@ -555,8 +726,76 @@ const CardItem = ({ data, handleDragging }: Props) => {
           </Button>
         </DialogActions>
       </DialogTimeTrackingContain>
+      <DialogSignInErrorContain
+        open={openErrorCardItem}
+        onClose={handleCloseHideError}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            width: '30%',
+            minWidth: '380px',
+          },
+        }}
+      >
+        <DialogTitle id="alert-dialog-title">
+          <div className="x-mark-contain">
+            <span className="x-mark-item x-mark-left" />
+            <span className="x-mark-item x-mark-right" />
+          </div>
+        </DialogTitle>
+        <DialogContent id="dialog-content">
+          <h3>User is not assign!</h3>
+          <p>You are not the owner of this project</p>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleCloseHideError}
+            autoFocus
+            className="btn-dialog"
+          >
+            ok
+          </Button>
+        </DialogActions>
+      </DialogSignInErrorContain>
+      <DialogDeleteTask
+        open={openDeleteTask}
+        onClose={handleCloseDialogDeleteTask}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: {
+            width: '30%',
+            minWidth: '380px',
+          },
+        }}
+      >
+        <DialogTitle id="alert-dialog-title">
+          <ReportIcon className="icon-error-title" />
+          <h5>Delete this task?</h5>
+        </DialogTitle>
+        <DialogContent id="dialog-content">
+          <p>
+            {`You're about to permanently delete this issue, its comments and
+            attachments, and all of its data.If you're not sure, you can resolve
+            or close this issue instead.`}
+          </p>
+        </DialogContent>
+        <DialogActions id="dialog-action">
+          <Button
+            onClick={handleClickDeleteTask}
+            autoFocus
+            className="btn-submit"
+          >
+            Delete
+          </Button>
+          <Button onClick={handleCloseDialogDeleteTask} className="btn-cancel">
+            Cancel
+          </Button>
+        </DialogActions>
+      </DialogDeleteTask>
     </>
   );
 };
 
-export default CardItem;
+export default observer(CardItem);

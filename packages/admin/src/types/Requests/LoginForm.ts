@@ -38,3 +38,8 @@ export interface Data {
   status: Status;
   priorityTask: PriorityType;
 }
+
+export interface UpdateStatusForm {
+  statusId: string;
+  taskId: string;
+}

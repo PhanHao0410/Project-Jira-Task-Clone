@@ -143,6 +143,7 @@ export class CreateProjectStore {
   setResetRemoveUser() {
     this.isLoading = false;
     this.removeUserFromProjectData = {};
+    this.errorRemoveUser = '';
   }
 
   get getDataCreateProjects() {

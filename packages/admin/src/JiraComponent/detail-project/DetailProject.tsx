@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { observer } from 'mobx-react-lite';
 import AddIcon from '@mui/icons-material/Add';
 import Button from '@mui/material/Button';
@@ -11,11 +12,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import { DialogActions } from '@mui/material';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import AppBar from '../../components/AppBar';
-import { useDragAndDrop } from './useDragAndDrop';
-import { ContainerCards } from './ContainerCard';
+import ContainerCards from './ContainerCard';
 import { Data, Status } from '../../types/Requests';
 import { useStoreMobx } from '../../mobx/hook';
-import { datas } from './TotalData';
 import {
   DetailProjectContain,
   TitleDetailContail,
@@ -36,24 +35,36 @@ const DetailProject = () => {
   const dataAllUser = userStore.getDataUsers;
   const dataUserByProject = createProjectStore.getDataUserByProjectId;
   const errorAssign = createProjectStore.getErrorAssignUserForProject;
-  const dataAssign = createProjectStore.getErrorAssignUserForProject;
+  const dataAssign = createProjectStore.getAssignUserProjectData;
   const errorRemoveUser = createProjectStore.getErrorRemoveUserFromProject;
+  const dataRemoveUser = createProjectStore.getDataRemoveUserFromProject;
   const dataProjectDetail = projectDetailStore.getDataProjectDetail;
+  const dataUpdateStatus = projectDetailStore.getDataUpdateStatus;
+  const dataCreateTask = projectDetailStore.getDataCreateTask;
+  const dataUpdateTask = projectDetailStore.getDataUpdateTask;
+  const dataUpdatePriority = projectDetailStore.getDataUpdatePriority;
+  const dataDeleteTask = projectDetailStore.getDataDeleteTask;
   const [open, setOpen] = React.useState(false);
   const [openError, setOpenError] = useState(false);
   const [valueSearch, setValueSearch] = useState('');
   const [DataUer, setDataUser] = useState([]);
-  const { isDragging, listItems, handleDragging, handleUpdateList } =
-    useDragAndDrop(dataProjectDetail);
-
-  console.log('check data detail: ', dataProjectDetail);
 
   useEffect(() => {
     const id = Number(idUser.codeProject);
     userStore.fetchAllUsers();
     createProjectStore.fetchUserByProjectId(id);
+  }, [dataAssign, dataRemoveUser]);
+
+  useEffect(() => {
+    const id = Number(idUser.codeProject);
     projectDetailStore.fetchProjectDetail(id);
-  }, []);
+  }, [
+    dataUpdateStatus,
+    dataCreateTask,
+    dataUpdateTask,
+    dataUpdatePriority,
+    dataDeleteTask,
+  ]);
 
   useEffect(() => {
     if (errorAssign || errorRemoveUser) {
@@ -80,6 +91,8 @@ const DetailProject = () => {
 
   const handleCloseErrorDialog = () => {
     setOpenError(false);
+    createProjectStore.setResetAssignUserState();
+    createProjectStore.setResetRemoveUser();
   };
 
   const handleClickAddUserForProject = (id) => {
@@ -93,6 +106,15 @@ const DetailProject = () => {
     const userId = id;
     createProjectStore.fetchRemoveUserFromProject({ projectId, userId });
   };
+  const onDragEnd = (result) => {
+    if (result.draggableId && result.destination?.droppableId) {
+      const taskId = result.draggableId;
+      const statusId = result.destination.droppableId;
+      projectDetailStore.fetchUpdateStatus({ taskId, statusId });
+    }
+  };
+
+  const lstTask = dataProjectDetail?.lstTask;
 
   return (
     <>
@@ -127,22 +149,29 @@ const DetailProject = () => {
             </div>
           </div>
         </TitleDetailContail>
-        <StateTaskProjectContain>
-          {dataProjectDetail &&
-            dataProjectDetail.lstTask &&
-            dataProjectDetail.lstTask.map((item, ind) => {
+        <DragDropContext onDragEnd={onDragEnd}>
+          <StateTaskProjectContain>
+            {lstTask?.map((item, index) => {
               return (
-                <ContainerCards
-                  items={item.lstTaskDeTail}
-                  status={item.statusId}
-                  key={item.statusId}
-                  isDragging={isDragging}
-                  handleDragging={handleDragging}
-                  handleUpdateList={handleUpdateList}
-                />
+                <Droppable droppableId={item.statusId} key={item.statusId}>
+                  {(provided, snapshot) => (
+                    <div {...provided.droppableProps} ref={provided.innerRef}>
+                      <ContainerCards
+                        items={item.lstTaskDeTail}
+                        status={item.statusId}
+                        key={item.statusId}
+                        provided={provided}
+                        projectId={idUser}
+                        dataUserByProject={dataUserByProject}
+                      />
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
               );
             })}
-        </StateTaskProjectContain>
+          </StateTaskProjectContain>
+        </DragDropContext>
       </DetailProjectContain>
       <DialogContain
         aria-labelledby="customized-dialog-title"
@@ -272,7 +301,7 @@ const DetailProject = () => {
         </DialogTitle>
         <DialogContent id="dialog-content">
           {errorAssign ? <h3>{errorAssign}</h3> : <h3>{errorRemoveUser}</h3>}
-          <p>You are not the owner of this project</p>
+          {/* <p>You are not the owner of this project</p> */}
         </DialogContent>
         <DialogActions>
           <Button

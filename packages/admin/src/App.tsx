@@ -28,7 +28,7 @@ function App() {
         <Route path={path.PROJECTS} component={Projects} />
         <Route path={path.CREATEPROJECT} component={CreateProject} />
         <Route path="/projec/:codeProject/board" component={DetailProject} />
-        <Route path="/pj/:codeProject/edit" component={EditProject} />
+        <Route path="/projectss/:codeProject/edit" component={EditProject} />
         <Route path={path.SIGNUP} component={SignUp} />
         <Route path={path.USERS} component={Users} />
         <Route path={path.ACCOUNTS} component={Accounts} />

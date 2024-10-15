@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
-import { EditorState } from 'draft-js';
+import { EditorState, ContentState, convertFromHTML } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 
 import { WordEmbedContain } from './styles';
 
-const WordEmbed = () => {
+const WordEmbed = ({ textEditor }) => {
   const [editorState, setEditorState] = useState(() =>
-    EditorState.createEmpty(),
+    EditorState.createWithContent(
+      ContentState.createFromBlockArray(convertFromHTML(textEditor)),
+    ),
   );
   return (
     <WordEmbedContain>
       <Editor
-        defaultEditorState={editorState}
+        editorState={editorState}
         onEditorStateChange={setEditorState}
         wrapperClassName="wrapper-class"
         editorClassName="editor-class"
