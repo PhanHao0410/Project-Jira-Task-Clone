@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useForm } from 'react-hook-form';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
-import { Button, useForkRef } from '@mui/material';
+import { Button } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -24,7 +24,6 @@ import {
   DialogSignUpSuccessContain,
   DialogSignUpErrorContain,
 } from './styles';
-import { SignUpStore } from './StoreSignUp';
 
 interface ISignUp {
   name: string;
@@ -159,7 +158,7 @@ const SignUp = () => {
           Register
         </Button>
         <p className="direct-signUp">
-          {`Already have an account?`}
+          Already have an account?
           <span onClick={() => history.push(path.ROOT)} role="presentation">
             Login now
           </span>

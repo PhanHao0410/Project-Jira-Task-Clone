@@ -99,7 +99,7 @@ export const TableContain = styled.table`
   @media ${devices.maxmd} {
     display: none;
   }
-  .css-15wwp11-MuiTableHead-root {
+  .table-head-contain {
     background-color: rgb(250, 250, 250);
     th {
       border-right: 1px solid rgb(225, 225, 225);
@@ -142,7 +142,7 @@ export const TableContain = styled.table`
       }
     }
   }
-  .css-34nofg-MuiTableRow-root {
+  .table-body-contain {
     height: 100%;
     border-bottom: 1px solid rgb(225, 225, 225);
 
@@ -269,7 +269,7 @@ export const BootstrapDialog = styled(Dialog)`
   .dialog-content {
     min-width: 500px;
     @media ${devices.maxsm} {
-      min-width: 380px;
+      min-width: 350px;
     }
   }
   .input-item-contain {

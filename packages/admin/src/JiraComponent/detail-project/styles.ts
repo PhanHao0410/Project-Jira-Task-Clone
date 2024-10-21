@@ -247,6 +247,7 @@ export const DialogContain = styled(Dialog)`
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   #customized-dialog-title {
+    width: 80%;
     span {
       color: rgb(29, 79, 216);
       padding-left: 5px;
@@ -553,10 +554,17 @@ export const DialogCardItemContentContain = styled(DialogContent)`
         border: none;
       }
     }
+    .status-contain {
+      min-width: 120;
+      width: 100%;
+      display: inline-block;
+      height: 30px;
+      margin-bottom: 30px;
+    }
   }
 `;
 export const DetailDialogCardItemContain = styled.div`
-  margin-top: 10px;
+  margin-top: 30px;
   .show-detail-carditem {
     width: 100%;
     display: flex;
@@ -683,6 +691,9 @@ export const PriorityContentContain = styled.div`
     &:hover {
       background-color: RGB(213 240 253);
     }
+  }
+  .icon-priority {
+    color: rgb(255, 95, 59);
   }
 `;
 export const MenuItemContain = styled(Menu)`

@@ -60,24 +60,26 @@ const CardItem = ({ data, projectId, dataUserByProject, clickTaskItem }) => {
   const errorDeleteTask = projectDetailStore.getErrorDeleteTask;
   const dataDeleteTask = projectDetailStore.getDataDeleteTask;
   const dataUpdateEstimate = projectDetailStore.getDataUpdateEstimate;
+  const textTest = '<p></p>';
 
-  const [open, setOpen] = React.useState(false);
-  const [openDeleteTask, setOpenDeleteTask] = useState(false);
-  const [showDescription, setShowDescription] = useState(false);
-  const [showComments, setShowComments] = useState(false);
+  const [open, setOpen] = React.useState<boolean>(false);
+  const [openDeleteTask, setOpenDeleteTask] = useState<boolean>(false);
+  const [showDescription, setShowDescription] = useState<boolean>(false);
+  const [showComments, setShowComments] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [showDetail, setShowDetail] = useState<boolean>(true);
   const [projectCategory, setProjectCategory] = React.useState('');
   const [valuePriority, setValuePriority] = useState('hight');
-  const [showEstimate, setShowEstimate] = useState(false);
+  const [showEstimate, setShowEstimate] = useState<boolean>(false);
   const [valueEstimate, setValueEstimate] = useState<any>();
   const [sliderSpent, setSliderSpent] = useState<string>('');
   const [idTask, setIdTask] = useState<number>();
-  const [openErrorCardItem, setOpenErrorCardItem] = useState(false);
+  const [openErrorCardItem, setOpenErrorCardItem] = useState<boolean>(false);
   const [valueAssignees, setValueAssignees] = useState<any>();
   const [anchorElPriority, setAnchorElPriority] =
     React.useState<null | HTMLElement>(null);
-  const [openTimeTracking, setOpenTimeTracking] = React.useState(false);
+  const [openTimeTracking, setOpenTimeTracking] =
+    React.useState<boolean>(false);
   const openPriority = Boolean(anchorElPriority);
   useEffect(() => {
     if (open && idTask) {
@@ -348,7 +350,7 @@ const CardItem = ({ data, projectId, dataUserByProject, clickTaskItem }) => {
                   </div>
                 ) : (
                   <div className="word-embed-description word-comment">
-                    <WordEmbed />
+                    <WordEmbed textEditor={textTest} />
                     <Button className="btn btn-save">Save</Button>
                     <Button
                       className="btn btn-cancel"
@@ -362,14 +364,7 @@ const CardItem = ({ data, projectId, dataUserByProject, clickTaskItem }) => {
             </div>
           </div>
           <div className="infor-task-contain">
-            <FormControl
-              sx={{
-                minWidth: 120,
-                width: '100%',
-                display: 'inline-block',
-                height: '30px',
-              }}
-            >
+            <FormControl className="status-contain">
               <Select
                 value={Number(dataTaskDetail?.statusId)}
                 onChange={handleChange}
@@ -411,15 +406,11 @@ const CardItem = ({ data, projectId, dataUserByProject, clickTaskItem }) => {
                     multiple
                     id="size-small-outlined-multi"
                     size="small"
-                    // value={checkTestArray(
-                    //   dataUserByProject,
-                    //   dataTaskDetail?.assigness,
-                    // )}
                     value={valueAssignees}
                     onChange={(event, newvalue) =>
                       handleAssignees(event, newvalue)
                     }
-                    fullWidth={true}
+                    fullWidth
                     options={dataUserByProject}
                     getOptionLabel={(dataUserByProject) =>
                       dataUserByProject.name
@@ -443,6 +434,7 @@ const CardItem = ({ data, projectId, dataUserByProject, clickTaskItem }) => {
                       {dataTaskDetail?.priorityTask?.priorityId === 1 && (
                         <>
                           <ExpandLessIcon
+                            className="icon-priority"
                             style={{
                               color: ' rgb(255, 95, 59)',
                             }}
@@ -749,11 +741,7 @@ const CardItem = ({ data, projectId, dataUserByProject, clickTaskItem }) => {
           <p>You are not the owner of this project</p>
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={handleCloseHideError}
-            autoFocus
-            className="btn-dialog"
-          >
+          <Button onClick={handleCloseHideError} className="btn-dialog">
             ok
           </Button>
         </DialogActions>

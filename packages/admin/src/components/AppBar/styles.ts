@@ -2,8 +2,8 @@ import styled from 'styled-components';
 import Menu from '@mui/material/Menu';
 import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
-import { devices } from '../../JiraComponent/DeviceScreen';
 import { Dialog } from '@mui/material';
+import { devices } from '../../JiraComponent/DeviceScreen';
 
 export const AppBarContain = styled.div`
   width: 100vw;

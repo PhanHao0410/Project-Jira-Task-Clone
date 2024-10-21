@@ -15,6 +15,8 @@ export class UserStore {
 
   errorDeleteUser: string = '';
 
+  errorEditUser: any = {};
+
   rootStore: IRootStore;
 
   constructor(rootStore: IRootStore) {
@@ -25,6 +27,7 @@ export class UserStore {
       deleteUserData: observable,
       errorDeleteUser: observable,
       editUserData: observable,
+      errorEditUser: observable,
       fetchAllUsers: action,
       fetchDeleteUser: action,
       fetchEditUser: action,
@@ -34,6 +37,7 @@ export class UserStore {
       getDataDeleteUser: computed,
       getErrorDeleteUser: computed,
       getDataEditUser: computed,
+      getErrorEditUser: computed,
       setResetState: action,
       ResetStateEditUser: action,
       setResetStateDeleteUser: action,
@@ -77,7 +81,7 @@ export class UserStore {
   fetchEditUser = async (action) => {
     try {
       this.isLoading = true;
-      this.editUserData = {};
+      this.errorEditUser = {};
       const response = await AuthenticationService.editUser(action);
       if (response.status === 200) {
         this.isLoading = false;
@@ -86,6 +90,7 @@ export class UserStore {
     } catch (e) {
       this.isLoading = false;
       this.editUserData = {};
+      this.errorEditUser = toJS(e.response.data);
     }
   };
 
@@ -98,6 +103,7 @@ export class UserStore {
   ResetStateEditUser() {
     this.isLoading = false;
     this.editUserData = {};
+    this.errorEditUser = {};
   }
 
   setResetStateDeleteUser() {
@@ -128,5 +134,9 @@ export class UserStore {
 
   get getErrorDeleteUser() {
     return this.errorDeleteUser;
+  }
+
+  get getErrorEditUser() {
+    return toJS(this.errorEditUser);
   }
 }

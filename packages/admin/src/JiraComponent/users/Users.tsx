@@ -64,8 +64,13 @@ const Users = () => {
     handleSubmit,
     watch,
     setValue,
+    setError,
     formState: { errors },
   } = useForm<UpdateAccountForm>();
+  const DataUsers = userStore.getDataUsers;
+  const DataDeleteUser = userStore.getDataDeleteUser;
+  const errorDeleteUser = userStore.getErrorDeleteUser;
+  const dataEditUser = userStore.getDataEditUser;
 
   const matches = useMediaQuery('(max-width: 768px)');
   const [page, setPage] = React.useState(1);
@@ -78,24 +83,16 @@ const Users = () => {
   const [numberPagination, setNumberPagination] = useState(0);
   const [userIdCurrent, setUserIdCurrent] = useState<number>(null);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [userEdit, setUserEdit] = useState({});
-  const [emailEdit, setEmailEdit] = useState('');
-  const [nameEdit, setNameEdit] = useState('');
-  const [phoneEdit, setPhoneEdit] = useState('');
   const [showPassword, setShowPassword] = useState(true);
   const [openProcessUpdate, setOpenProcessUpdate] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(true);
   const [openDeleteError, setOpenDeleteError] = useState(false);
   const [openDeleteSuccess, setOpenDeleteSuccess] = useState(false);
   const openCancel = Boolean(anchorEl);
-  const DataUsers = userStore.getDataUsers;
-  const DataDeleteUser = userStore.getDataDeleteUser;
-  const errorDeleteUser = userStore.getErrorDeleteUser;
-  const dataEditUser = userStore.getDataEditUser;
 
   useEffect(() => {
     userStore.fetchAllUsers();
-  }, [DataDeleteUser]);
+  }, [DataDeleteUser, dataEditUser]);
 
   useEffect(() => {
     const rowPrevious: number = page * rowsPerPage - rowsPerPage;
@@ -203,13 +200,16 @@ const Users = () => {
 
   const handleClickOpenEdit = (user) => {
     setOpen(true);
-    setUserEdit(user);
-    setEmailEdit(user.email);
-    setNameEdit(user.name);
-    setPhoneEdit(user.phoneNumber);
+    setValue('id', user?.userId);
+    setValue('email', user.email);
+    setValue('name', user.name);
+    setValue('phoneNumber', user.phoneNumber);
   };
   const handleClose = () => {
     setOpen(false);
+    userStore.ResetStateEditUser();
+    setError('password', null);
+    setError('passwordConfirmation', null);
   };
 
   const handleChange = (event: SelectChangeEvent) => {
@@ -311,7 +311,7 @@ const Users = () => {
         <TableContain>
           <Table aria-label="simple table">
             <TableHead>
-              <TableRow>
+              <TableRow className="table-head-contain">
                 <TableCell align="left">
                   <div className="title-table-contain">
                     <h3>No</h3>
@@ -376,7 +376,7 @@ const Users = () => {
                     <TableRow
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                       key={item.userId}
-                      className="test-phone"
+                      className="table-body-contain"
                     >
                       <TableCell align="left">
                         {ind + (page - 1) * rowsPerPage + 1}
@@ -519,11 +519,7 @@ const Users = () => {
                   <p>
                     Id<span>*</span>
                   </p>
-                  <input
-                    className="input-value-default"
-                    value={userEdit.userId}
-                    {...register('id')}
-                  />
+                  <input className="input-value-default" {...register('id')} />
                 </div>
               </Typography>
               <Typography gutterBottom>
@@ -533,9 +529,7 @@ const Users = () => {
                   </p>
                   <input
                     className={errors.email?.message ? 'input-err' : ''}
-                    value={emailEdit}
                     {...register('email', {
-                      onChange: (e) => setEmailEdit(e.target.value),
                       required: 'Email is required!',
                       pattern: {
                         value:
@@ -556,9 +550,7 @@ const Users = () => {
                   </p>
                   <input
                     className={errors.name?.message ? 'input-err' : ''}
-                    value={nameEdit}
                     {...register('name', {
-                      onChange: (e) => setNameEdit(e.target.value),
                       required: 'Name is required',
                     })}
                   />
@@ -572,9 +564,7 @@ const Users = () => {
                   <p>Phone number</p>
                   <input
                     className={errors.phoneNumber?.message ? 'input-err' : ''}
-                    value={phoneEdit}
                     {...register('phoneNumber', {
-                      onChange: (e) => setPhoneEdit(e.target.value),
                       required: 'Phone number is required!',
                       pattern: {
                         value: /^[0]+[0-9]{9}$/,

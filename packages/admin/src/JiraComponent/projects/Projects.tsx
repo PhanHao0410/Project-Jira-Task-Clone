@@ -289,7 +289,7 @@ const Projects = () => {
         <TableContain>
           <Table aria-label="simple table">
             <TableHead>
-              <TableRow>
+              <TableRow className="table-head-contain">
                 <TableCell
                   align="left"
                   style={{ cursor: 'pointer' }}
@@ -385,26 +385,20 @@ const Projects = () => {
                   return (
                     <TableRow
                       key={item.id}
+                      className="table-row-item"
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
                       <TableCell align="left">{item.id}</TableCell>
                       <TableCell
                         align="left"
-                        className="body-project-name"
                         onClick={() => history.push(`/projec/${item.id}/board`)}
                       >
-                        {item.projectName}
+                        <p className="body-project-name">{item.projectName}</p>
                       </TableCell>
                       <TableCell align="left">{item.categoryName}</TableCell>
                       <TableCell align="left">{item.creator.name}</TableCell>
-                      <TableCell
-                        align="left"
-                        style={{
-                          display: 'flex',
-                          borderBottom: 'none',
-                        }}
-                      >
-                        <div style={{ position: 'relative' }}>
+                      <TableCell align="left" className="member-contain">
+                        <div className="member-tooltip">
                           {item.members?.slice(0, 2).map((member) => {
                             return (
                               <Tooltip
@@ -426,9 +420,7 @@ const Projects = () => {
                             <LightTooltip
                               title={
                                 <React.Fragment>
-                                  <div
-                                    style={{ display: 'flex', padding: '10px' }}
-                                  >
+                                  <div className="member-light-tooltip">
                                     {item.members?.slice(2).map((member) => {
                                       return (
                                         <Tooltip
@@ -440,18 +432,7 @@ const Projects = () => {
                                           <img
                                             src={member.avatar}
                                             alt="image_avatar"
-                                            style={{
-                                              width: '35px',
-                                              height: '35px',
-                                              borderRadius: '50%',
-                                              backgroundColor:
-                                                'rgb(221,221,221)',
-                                              display: 'flex',
-                                              alignItems: 'center',
-                                              justifyContent: 'center',
-                                              marginRight: '2px',
-                                              fontWeight: '400',
-                                            }}
+                                            className="image-member"
                                           />
                                         </Tooltip>
                                       );
@@ -507,9 +488,9 @@ const Projects = () => {
                   <li>
                     <h5>Project name</h5>
                     <p
-                      style={{ color: 'rgb(29 78 216)', cursor: 'pointer' }}
-                      onClick={() => history.push(`/projec/${1546}/board`)}
+                      onClick={() => history.push(`/projec/${item.id}/board`)}
                       role="presentation"
+                      className="project-name"
                     >
                       {item.projectName}
                     </p>

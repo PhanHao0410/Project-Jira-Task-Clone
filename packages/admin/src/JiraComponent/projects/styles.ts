@@ -97,8 +97,8 @@ export const TableContain = styled.table`
   @media ${devices.maxmd} {
     display: none;
   }
-  .css-15wwp11-MuiTableHead-root {
-    background-color: rgb(250, 250, 250);
+  .table-head-contain {
+    background-color: rgb(250, 250, 250) !important;
     th {
       border-right: 1px solid rgb(225, 225, 225);
       &:last-child {
@@ -133,7 +133,7 @@ export const TableContain = styled.table`
     }
   }
 
-  .css-34nofg-MuiTableRow-root {
+  .table-row-item {
     height: 100%;
     border-bottom: 1px solid rgb(225, 225, 225);
 
@@ -141,10 +141,6 @@ export const TableContain = styled.table`
       background-color: rgb(250, 250, 250);
     }
 
-    .body-project-name {
-      color: rgb(52, 88, 216);
-      cursor: pointer;
-    }
     .name-member-item {
       width: 35px;
       height: 35px;
@@ -183,6 +179,32 @@ export const TableContain = styled.table`
         background-color: RGB(221 221 221);
       }
     }
+    .member-contain {
+      display: flex;
+      border-bottom: none;
+      .member-tooltip {
+        position: relative;
+      }
+      .member-light-tooltip {
+        display: flex;
+        padding: 10px;
+        .image-member {
+          width: 35px;
+          height: 35px;
+          border-radius: 50%;
+          background-color: rgb(221, 221, 221);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 2px;
+          font-weight: 400;
+        }
+      }
+    }
+  }
+  .body-project-name {
+    color: rgb(52, 88, 216) !important;
+    cursor: pointer !important;
   }
 `;
 
@@ -237,6 +259,11 @@ export const ProjectContentItem = styled.ul`
     p {
       font-size: 14px;
     }
+    .project-name {
+      color: rgb(29 78 216);
+      cursor: pointer;
+    }
+
     .name-member-item {
       width: 35px;
       height: 35px;

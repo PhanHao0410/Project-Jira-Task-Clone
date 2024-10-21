@@ -15,6 +15,8 @@ import AppBar from '../../components/AppBar';
 import ContainerCards from './ContainerCard';
 import { Data, Status } from '../../types/Requests';
 import { useStoreMobx } from '../../mobx/hook';
+import history from '../../utils/history';
+import path from '../../constants/clientPath';
 import {
   DetailProjectContain,
   TitleDetailContail,
@@ -121,7 +123,10 @@ const DetailProject = () => {
       <AppBar />
       <DetailProjectContain>
         <div className="direct-page">
-          <span>Projects</span>/ {dataProjectDetail.projectName}
+          <span onClick={() => history.push(path.PROJECTS)} role="presentation">
+            Projects
+          </span>
+          / {dataProjectDetail.projectName}
         </div>
         <TitleDetailContail>
           <h3>Board</h3>

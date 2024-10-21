@@ -150,7 +150,7 @@
   "scripts": {
     "analyze": "source-map-explorer build/static/js/main.*",
     "start:admin": "yarn install && node scripts/start.js",
-    "build:admin": "yarn install && FRONTEND_PACKAGE=admin node scripts/build.js",
+    "build:admin": "yarn install && node scripts/build.js",
     "lint:admin": "yarn install && eslint 'packages/admin/src/{components,constants,containers,context,helpers,reducers,services,store,utils}/**/*.{tsx,ts}' --fix",
     "start:frontend": "yarn install && FRONTEND_PACKAGE=frontend node scripts/start.js",
     "build:frontend": "yarn install && FRONTEND_PACKAGE=frontend node scripts/build.js",

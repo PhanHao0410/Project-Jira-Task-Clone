@@ -23,9 +23,9 @@ import TextField from '@mui/material/TextField';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import { useStoreMobx } from '../../mobx/hook';
 import history from '../../utils/history';
 import path from '../../constants/clientPath';
-import { useStoreMobx } from '../../mobx/hook';
 import {
   removeToken,
   removeLoginInfo,
@@ -372,7 +372,7 @@ const AppBar = (props) => {
                   <Box sx={{ minWidth: 120 }}>
                     <FormControl sx={{ minWidth: 120, width: '100%' }}>
                       <Select
-                        // displayEmpty
+                        displayEmpty
                         inputProps={{ 'aria-label': 'Without label' }}
                         {...register('project', {
                           required: 'Project is required',
@@ -520,7 +520,7 @@ const AppBar = (props) => {
                   onChange={(event, newvalue) =>
                     handleAssignees(event, newvalue)
                   }
-                  fullWidth={true}
+                  fullWidth
                   options={dataUserProject}
                   getOptionLabel={(dataUserProject) => dataUserProject.name}
                   renderInput={(params) => (
